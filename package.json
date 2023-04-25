@@ -1,0 +1,52 @@
+{
+  "name": "wheat-stack",
+  "version": "1.0.0",
+  "description": "A starter template for the WHEAT stack.",
+  "main": "index.js",
+  "scripts": {
+    "build": "cross-env NODE_ENV=production npm-run-all clean -p build:*",
+    "build:11ty": "eleventy --quiet",
+    "build:css": "tailwindcss -i src/_bundle/main.pcss -o dist/assets/main.bundle.css --minify --postcss",
+    "build:js": "esbuild src/_bundle/main.js --outfile=dist/assets/main.bundle.js --bundle",
+    "clean": "rm -rf dist",
+    "dev": "cross-env NODE_ENV=development npm-run-all -p dev:*",
+    "dev:11ty": "eleventy --serve --quiet",
+    "dev:css": "tailwindcss -i src/_bundle/main.pcss -o dist/assets/main.bundle.css --watch --postcss",
+    "dev:js": "esbuild src/_bundle/main.js --outfile=dist/assets/main.bundle.js --bundle --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/emelleme/wheat-stack.git"
+  },
+  "prettier": {
+    "semi": false,
+    "singleQuote": true,
+    "tabWidth": 2,
+    "trailingComma": "es5",
+    "htmlWhitespaceSensitivity": "ignore"
+  },
+  "keywords": [
+    "eleventy",
+    "tailwind",
+    "alpine"
+  ],
+  "author": "EmellemE",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/emelleme/wheat-stack/issues"
+  },
+  "homepage": "https://github.com/emelleme/wheat-stack#readme",
+  "dependencies": {
+    "@11ty/eleventy": "^0.12.1",
+    "alpinejs": "^3.1.0",
+    "cross-env": "^6.0.3",
+    "daisyui": "^2.51.5",
+    "esbuild": "^0.12.9",
+    "node-fetch": "^3.0.0",
+    "npm-run-all": "^4.1.5",
+    "postcss-import": "^14.0.0",
+    "serverless-cloudflare-workers": "^1.2.0",
+    "tailwindcss": "^3.3.1",
+    "wrangler": "^0.0.10"
+  }
+}

@@ -1,0 +1,25 @@
+{# This page is built with nunjucks! #}
+
+{% set title = 'Hey Mia' %}
+{% extends "layout.njk" %}
+
+{% block body %}
+  <main class="">
+    <div class="min-h-screen flex items-center justify-center">
+    <div class="bg-white shadow-md rounded p-8 w-full max-w-md">
+      <h1 class="text-3xl font-bold mb-4">MIAGPT Login</h1>
+      <form action="/your-login-endpoint" method="post">
+        <div class="mb-4">
+          <label for="email" class="block text-gray-700 text-sm font-bold mb-2">Email</label>
+          <input type="email" id="email" name="email" placeholder="Your email address" required class="daisyui-input w-full">
+        </div>
+        <div class="mb-6">
+          <label for="password" class="block text-gray-700 text-sm font-bold mb-2">Password</label>
+          <input type="password" id="password" name="password" placeholder="Your password" required class="daisyui-input w-full">
+        </div>
+        <button type="submit" class="daisyui-button bg-blue-500 text-white w-full">Login</button>
+      </form>
+    </div>
+  </div>
+  </main>
+{% endblock %}

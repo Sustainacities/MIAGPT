@@ -1,0 +1,6 @@
+backend:
+  name: github
+  repo: emelleme/miagpt # CHANGE ME
+  branch: master
+  base_url: https://miagpt.pages.dev # CHANGE ME
+  auth_endpoint: api/auth
