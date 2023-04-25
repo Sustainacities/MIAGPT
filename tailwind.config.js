@@ -13,7 +13,7 @@ module.exports = {
   },
   plugins: [require("daisyui")],
   daisyui: {
-    themes: ["lemonade", "dark", "forest"],
+    themes: ["lemonade", "synthwave", "pastel"],
   },
   purge: ['./src/**/*.{js,md,njk,svg}'],
 }

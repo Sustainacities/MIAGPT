@@ -6,20 +6,46 @@
 {% block body %}
   <main class="">
     <div class="min-h-screen flex items-center justify-center">
-    <div class="bg-white shadow-md rounded p-8 w-full max-w-md">
-      <h1 class="text-3xl font-bold mb-4">MIAGPT Login</h1>
-      <form action="/your-login-endpoint" method="post">
-        <div class="mb-4">
-          <label for="email" class="block text-gray-700 text-sm font-bold mb-2">Email</label>
-          <input type="email" id="email" name="email" placeholder="Your email address" required class="daisyui-input w-full">
-        </div>
-        <div class="mb-6">
-          <label for="password" class="block text-gray-700 text-sm font-bold mb-2">Password</label>
-          <input type="password" id="password" name="password" placeholder="Your password" required class="daisyui-input w-full">
-        </div>
-        <button type="submit" class="daisyui-button bg-blue-500 text-white w-full">Login</button>
-      </form>
+    <div class="bg-transparent shadow-md rounded p-8 w-full max-w-md">
+      <h1 class="text-3xl font-bold mb-4 text-center"><img src="/assets/miawhite.png" alt=""> Hey Mia</h1>
+      
+      <div class="justify-center items-center flex place-content-between space-x-7">
+        <a href="https://discord.gg/PQakcAY5" class="btn btn-active btn-primary z-50"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z" />
+</svg>
+ 
+ Join the beta</a>
+        <a href="https://discord.com/api/oauth2/authorize?client_id=1100501572301115524&permissions=2147600384&scope=applications.commands%20bot" class="z-50 btn btn-active btn-secondary"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+</svg>
+
+
+Sign in with Discord</a>
+      </div>
     </div>
   </div>
+
+  <footer class="footer footer-center p-10 gradient-background text-primary-content">
+  <div class="flex">
+    <svg width="50" height="50" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd" class="inline-block fill-current"><path d="M22.672 15.226l-2.432.811.841 2.515c.33 1.019-.209 2.127-1.23 2.456-1.15.325-2.148-.321-2.463-1.226l-.84-2.518-5.013 1.677.84 2.517c.391 1.203-.434 2.542-1.831 2.542-.88 0-1.601-.564-1.86-1.314l-.842-2.516-2.431.809c-1.135.328-2.145-.317-2.463-1.229-.329-1.018.211-2.127 1.231-2.456l2.432-.809-1.621-4.823-2.432.808c-1.355.384-2.558-.59-2.558-1.839 0-.817.509-1.582 1.327-1.846l2.433-.809-.842-2.515c-.33-1.02.211-2.129 1.232-2.458 1.02-.329 2.13.209 2.461 1.229l.842 2.515 5.011-1.677-.839-2.517c-.403-1.238.484-2.553 1.843-2.553.819 0 1.585.509 1.85 1.326l.841 2.517 2.431-.81c1.02-.33 2.131.211 2.461 1.229.332 1.018-.21 2.126-1.23 2.456l-2.433.809 1.622 4.823 2.433-.809c1.242-.401 2.557.484 2.557 1.838 0 .819-.51 1.583-1.328 1.847m-8.992-6.428l-5.01 1.675 1.619 4.828 5.011-1.674-1.62-4.829z"></path></svg>
+    <p class="text-4xl font-bold">
+      SAVEMIAMI <br/>
+    </p> 
+    
+  </div>
+<div>
+  <a class="flex flex-row z-50" href="https://savemiami.notion.site/SaveMiami-8e08dcb217e349509cefff8b62afdb9d">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Notion-logo.svg/32px-Notion-logo.svg.png" alt="">
+    <span class="text-3xl pl-4 text-base-100 underline">Get Involved</span>
+  </a>   
+</div>
+
+   
+  <div>
+    <div class="grid grid-flow-col gap-4">
+      <a class="z-50" target="_blank" href="https://discord.com/invite/XSdrT7V7Zp"><img class="h-8" src="https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0b5061df290f5892d944_full_logo_black_RGB.svg" alt="Discord"></a> 
+      </div>
+  </div>
+</footer>
   </main>
 {% endblock %}

@@ -1,0 +1,26 @@
+{# This page is built with nunjucks! #}
+
+{% set title = 'Hey Mia' %}
+{% extends "chat-layout.njk" %}
+
+{% block body %}
+  <main class="">
+    <div class="container mx-auto px-4 py-10">
+    <h1 class="text-3xl font-bold mb-4">MIAGPT - Miami Climate Data Chat Interface</h1>
+    <div class="bg-white shadow-md rounded p-6">
+      <div class="chat-output overflow-y-auto">
+        <!-- Chat messages will be added here -->
+      </div>
+      <div class="chat-input mt-4">
+        <div class="daisyui-dropdown">
+          <select x-model="selectedDataset" class="daisyui-dropdown-trigger">
+            <!-- Dataset categories options will be added here -->
+          </select>
+        </div>
+        <input type="text" x-model="userInput" placeholder="Type your question here..." class="daisyui-input w-full mt-2">
+        <button @click="submitQuery" class="daisyui-button bg-blue-500 text-white mt-2">Submit</button>
+      </div>
+    </div>
+  </div>
+  </main>
+{% endblock %}

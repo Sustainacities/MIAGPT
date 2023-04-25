@@ -1,1 +1,61 @@
 /* Custom Base Styles Go Here. */
+@font-face {
+  font-family: 'Riemann';
+  src: url('/assets/fonts/riemann.ttf') format('truetype');
+}
+body {
+  background: #000;
+}
+.svgbg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+}
+
+
+.links {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  font-size: 18px;
+  font-family: sans-serif;
+}
+a {
+  text-decoration: none;
+  color: black;
+  margin-left: 1em;
+}
+a:hover {
+  text-decoration: underline;
+}
+a img.icon {
+  display: inline-block;
+  height: 1em;
+  margin: 0 0 -0.1em 0.3em;
+}
+
+.gradient-background {
+  background: linear-gradient(300deg,deepskyblue,darkviolet,#2a7a0f);
+  background-size: 180% 180%;
+  animation: gradient-animation 8s ease infinite;
+}
+
+@keyframes gradient-animation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.paper-note {
+  background-image: url('https://img.freepik.com/free-photo/white-texture_1160-786.jpg?w=1480&t=st=1680121212~exp=1680121812~hmac=406fef25f6a53d591782106d453c1c3e7000860a4875bd48d2f24325a4794f03');
+  background-size: cover;
+  background-repeat: no-repeat;
+}

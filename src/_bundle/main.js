@@ -2,6 +2,15 @@ import Alpine from 'alpinejs'
 
 window.Alpine = Alpine
 
+window.miagptApp = function() {
+  return {
+    userInput: '',
+    selectedDataset: '',
+    submitQuery() {
+      // Handle query submission and interaction with Cloudflare Pages Functions
+    }
+  };
+}
 // Start Alpine when the page is ready.
 window.addEventListener('DOMContentLoaded', () => {
   Alpine.start()
