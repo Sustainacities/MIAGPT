@@ -38,8 +38,19 @@ export async function onRequest(context) {
     if (response.ok) {
         const data = await response.json();
         let accessToken = data.access_token;
+
+        const resp = await fetch("https://discord.com/api/users/@me", {
+            headers: { Authorization: `Bearer ${accessToken}` },
+        });
+
+        if (!resp.ok) {
+            console.log(resp.user)
+            const user = resp.user;
+            return false;
+        }
+
         // Store the access token and use it for subsequent requests
-        const task = await context.env.MIAUSERS.put("test",JSON.stringify({'user':12345,token:data.access_token}));
+        const task = await context.env.MIAUSERS.put("test",JSON.stringify({'user':user,token:data.access_token}));
         // Handle error or redirect to the login page
         const destinationURL = `http://${request.headers.get("host")}/app/home?token=${accessToken}`;
         const statusCode = 302;
