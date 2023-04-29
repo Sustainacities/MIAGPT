@@ -11,7 +11,8 @@
   {% block head %}{% endblock %}
 </head>
 <body hx-boost="true" class="bg-gray-100 min-h-screen">
- 
+  
+  {% include "chat-header.njk" %}
   {% block body %}
     <div class="">
       {{ content | safe }}
