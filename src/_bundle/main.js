@@ -32,9 +32,11 @@ window.addEventListener('storage', (event) => {
   }
 });
 
-async function send() {
+window.send = async function() {
   console.log('send')
+
   const input = {
+    currentMessage:localStorage.getItem('currentMessage'),
     chats:localStorage.getItem('chats'),
     activeTab: localStorage.getItem('activeTab') || 'train'
   }
@@ -47,8 +49,10 @@ async function send() {
     }
   })
 
-  let data = await resp.json()
-  console.log(Alpine.store('myApp').activeTab)
+  let data = await resp.json();
+  localStorage.setItem('response',data.response);
+  Alpine.store('response',data.response);
+  console.log(data.response)
 }
 
 // Basic Store Example in Alpine.
@@ -60,7 +64,7 @@ window.addEventListener('alpine:init', () => {
       {calltoaction:'Ask me to graph or chart something and I will do my best to generate it',name:'Graph'},
       {calltoaction:'Ask me what you would like me to map',name:'Map'},
       {calltoaction:'Ask me to generate a table of data you would like.',name:'Table'}
-    ]);
+  ]);
   
   Alpine.store('nav', {
     isOpen: false,
