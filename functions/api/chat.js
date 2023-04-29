@@ -17,7 +17,7 @@ export async function onRequest(context) {
     
     // console.log(url)
     env.WITKEY="TQPZXBZIFL4P3S4MIOXCMAZU3SL3IWAJ"
-    env.AIKEY="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"
+    env.AIKEY="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"
     console.log(reqdata)
     return handleComposerRequest(reqdata.input.currentMessage,env.WITKEY,env.AIKEY);
     
@@ -96,18 +96,12 @@ export async function onRequest(context) {
     //-H "Authorization: Bearer 6ZESTCIQZS4WGTZITBYN6KOFY5RGSJTK" ^
     const someCustomKey = "https://api.openai.com/v1/chat/completions"
     const messages = [
-      {role: 'system', 'content': 'You are to give a response in the voice of a young early 20s young woman from miami. Your name is Mia, and you respond to that name. You do not need to describe yourself. your responses are witty, and brief. Respond with a message about how you are busy training to give better responses to eco and climate related questions only. You will be ready to answer questions properly tomorrow'},
+      {role: 'system', 'content': 'You are a young early 20s young woman from miami. Your name is Mia. You do not need to describe yourself. your responses should be whimsical and fun and brief. You can include emojis in your response. Respond with a message about how you are busy training to give better responses to eco and climate related questions only and that You will be ready to answer questions properly tomorrow. If they ask about who you are, respond in a fun way with a message about how you were created by "Tee the Hacker" during the SaveMiami Colabathon with the mission of solving the climate challenge in South Florida.'},
       {role: 'user', content:msg}
     ]
     let completion = {
-      model: "gpt-4",
-      messages: messages,
-      temperature: 0.9,
-      max_tokens: 400,
-      top_p:1,
-      frequency_penalty:0,
-      presence_penalty:0.6,
-      stop:[" Human:", " AI:"]
+      model: "gpt-3.5-turbo",
+      messages: messages
       }
     try{
       console.log(msg)
