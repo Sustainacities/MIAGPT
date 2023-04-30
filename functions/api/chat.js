@@ -52,7 +52,7 @@ export async function onRequest(context) {
     // and always store using HTTPS e.g. https://www.example.com/file-uri-here
     //"https://api.wit.ai/message?v=20221109&q=hello%21"
     //-H "Authorization: Bearer 6ZESTCIQZS4WGTZITBYN6KOFY5RGSJTK" ^
-    const someCustomKey = `https://api.wit.ai/event?v=20230215&session_id=t6v&context_map=%7B%7D`
+    const someCustomKey = `https://api.wit.ai/message?v=20230215&q=${msg}`
     
     try{
       console.log(msg)
@@ -62,11 +62,7 @@ export async function onRequest(context) {
           // for a max of 5 seconds before revalidating the resource
           'Authorization': `Bearer ${witkey}`,
         },
-        method:"POST",
-        body: JSON.stringify({
-          "type":"message",
-          "message": msg
-        })
+        method:"GET"
       })
       let witty = await JSON.parse(await response.text());
       // Reconstruct the Response object to make its headers mutable.
