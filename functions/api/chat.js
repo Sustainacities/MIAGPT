@@ -53,8 +53,8 @@ export async function onRequest(context) {
     }
   }
 
-  async function handleComposerRequest(msg,witkey,aikey) {
-  
+  async function handleComposerRequest(input,witkey,aikey) {
+    let msg = input.currentMessage
     const someCustomKey = `https://api.wit.ai/message?v=20230215&q=${msg}`
     
     try{
@@ -72,7 +72,7 @@ export async function onRequest(context) {
       
       
         //send to gpt
-        let gpt = await handleAIRequest(msg,aikey)
+        let gpt = await handleAIRequest(input,aikey)
         // witty.response.text = gpt;
         console.log(gpt)
       response = new Response(JSON.stringify({response:gpt}), {'content-type': 'application/json;charset=UTF-8'})
