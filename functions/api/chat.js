@@ -87,9 +87,9 @@ export async function onRequest(context) {
     const someCustomKey = "https://api.openai.com/v1/chat/completions"
     let msg = input.currentMessage;
     let msgType = input.activeTab.toLowerCase();
-    let sysMsg = getObjectByType(msgType, system_prompts);
+    //let sysMsg = getObjectByType(msgType, system_prompts);
     const messages = [
-      {role: 'system', 'content': sysMsg.prompt},
+      {role: 'system', 'content': 'You are a young early 20s young woman from miami. Your name is Mia. You do not need to describe yourself. your responses should be whimsical and fun and brief. You can include emojis in your response. Respond with a message about how you are busy training to give better responses to eco and climate related questions only and that You will be ready to generate graphs, maps and tables tomorrow. If they ask about who you are, respond in a fun way with a message about how you were created by "Tee the Hacker" during the SaveMiami Colabathon with the mission of solving the climate challenge in South Florida.'},
       {role: 'user', content:msg}
     ]
     let completion = {
