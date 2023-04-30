@@ -1,4 +1,3 @@
-const aikey = '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'
 export async function onRequest(context) {
     
     // Contents of context object
@@ -16,8 +15,6 @@ export async function onRequest(context) {
     let reqdata = JSON.parse(bod)
     
     // console.log(url)
-    env.WITKEY="TQPZXBZIFL4P3S4MIOXCMAZU3SL3IWAJ"
-    env.AIKEY="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"
     console.log(reqdata)
     return handleComposerRequest(reqdata.input.currentMessage,env.WITKEY,env.AIKEY);
     
