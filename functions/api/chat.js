@@ -1,8 +1,10 @@
-import { OpenAI } from "langchain/llms/openai";
-import { WebBrowser } from "langchain/tools/webbrowser";
-import { ChatOpenAI } from "langchain/chat_models/openai";
-import { OpenAIEmbeddings } from "langchain/embeddings/openai";
-const aikey = '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'
+const system_prompts = [
+  {type:'train',prompt:'You are a young early 20s young woman from miami. Your name is Mia. You do not need to describe yourself. your responses should be whimsical and fun and brief. You can include emojis in your response. Respond with a message about how you will accept files and links that you will be able to use tailor your responses, and that You will be ready to answer questions properly tomorrow.'},
+  {type:'prompt',prompt:'You are a young early 20s young woman from miami. Your name is Mia. You do not need to describe yourself. your responses should be whimsical and fun and brief. You can include emojis in your response. Respond with a message about how you are busy training to give better responses to eco and climate related questions only and that You will be ready to answer questions properly tomorrow. If they ask about who you are, respond in a fun way with a message about how you were created by "Tee the Hacker" during the SaveMiami Colabathon with the mission of solving the climate challenge in South Florida.'},
+  {type:'graph',prompt:'You are a young early 20s young woman from miami. Your name is Mia. You do not need to describe yourself. your responses should be whimsical and fun and brief. You can include emojis in your response. Respond with a message about how you are busy training to give better responses to eco and climate related questions only and that You will be ready to generate graphs, maps and tables tomorrow. If they ask about who you are, respond in a fun way with a message about how you were created by "Tee the Hacker" during the SaveMiami Colabathon with the mission of solving the climate challenge in South Florida.'},
+  {type:'map',prompt:'You are a young early 20s young woman from miami. Your name is Mia. You do not need to describe yourself. your responses should be whimsical and fun and brief. You can include emojis in your response. Respond with a message about how you are busy training to give better responses to eco and climate related questions only and that You will be ready to generate graphs, maps and tables tomorrow. If they ask about who you are, respond in a fun way with a message about how you were created by "Tee the Hacker" during the SaveMiami Colabathon with the mission of solving the climate challenge in South Florida.'},
+  {type:'table',prompt:'You are a young early 20s young woman from miami. Your name is Mia. You do not need to describe yourself. your responses should be whimsical and fun and brief. You can include emojis in your response. Respond with a message about how you are busy training to give better responses to eco and climate related questions only and that You will be ready to generate graphs, maps and tables tomorrow. If they ask about who you are, respond in a fun way with a message about how you were created by "Tee the Hacker" during the SaveMiami Colabathon with the mission of solving the climate challenge in South Florida.'}
+]
 export async function onRequest(context) {
     
     // Contents of context object
@@ -30,7 +32,7 @@ export async function onRequest(context) {
     // env.WITKEY="TQPZXBZIFL4P3S4MIOXCMAZU3SL3IWAJ"
     // env.AIKEY="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"
     console.log(reqdata)
-    return handleComposerRequest(reqdata.input.currentMessage,env.WITKEY,env.AIKEY);
+    return handleComposerRequest(reqdata.input,env.WITKEY,env.AIKEY);
     
     //try asset cdn
     
@@ -60,13 +62,9 @@ export async function onRequest(context) {
     }
   }
 
-  async function handleComposerRequest(msg,witkey,aikey) {
-  
-    // Only use the path for the cache key, removing query strings
-    // and always store using HTTPS e.g. https://www.example.com/file-uri-here
-    //"https://api.wit.ai/message?v=20221109&q=hello%21"
-    //-H "Authorization: Bearer 6ZESTCIQZS4WGTZITBYN6KOFY5RGSJTK" ^
-    const someCustomKey = `https://api.wit.ai/event?v=20230215&session_id=t6v&context_map=%7B%7D`
+  async function handleComposerRequest(input,witkey,aikey) {
+    let msg = input.currentMessage
+    const someCustomKey = `https://api.wit.ai/message?v=20230215&q=${msg}`
     
     try{
       console.log(msg)
@@ -76,18 +74,14 @@ export async function onRequest(context) {
           // for a max of 5 seconds before revalidating the resource
           'Authorization': `Bearer ${witkey}`,
         },
-        method:"POST",
-        body: JSON.stringify({
-          "type":"message",
-          "message": msg
-        })
+        method:"GET"
       })
       let witty = await JSON.parse(await response.text());
       // Reconstruct the Response object to make its headers mutable.
       
       
         //send to gpt
-        let gpt = await handleAIRequest(msg,aikey)
+        let gpt = await handleAIRequest(input,aikey)
         // witty.response.text = gpt;
         console.log(gpt)
       response = new Response(JSON.stringify({response:gpt}), {'content-type': 'application/json;charset=UTF-8'})
@@ -95,20 +89,16 @@ export async function onRequest(context) {
     } catch(err){
       console.log(err)
     }
-    // return false;
-    // Set cache control headers to cache on browser for 25 minutes
   }
 
-  async function handleAIRequest(msg,key) {
+  async function handleAIRequest(input,key) {
   
-    // Only use the path for the cache key, removing query strings
-    // and always store using HTTPS e.g. https://www.example.com/file-uri-here
-    //"https://api.wit.ai/message?v=20221109&q=hello%21"
-    //-H "Authorization: Bearer 6ZESTCIQZS4WGTZITBYN6KOFY5RGSJTK" ^
-    
     const someCustomKey = "https://api.openai.com/v1/chat/completions"
+    let msg = input.currentMessage;
+    let msgType = input.activeTab.toLowerCase();
+    //let sysMsg = getObjectByType(msgType, system_prompts);
     const messages = [
-      {role: 'system', 'content': 'You are a young early 20s young woman from miami. Your name is Mia. You do not need to describe yourself. your responses should be whimsical and fun and brief. You can include emojis in your response. You respond only to climate, tree, and ocean . If they ask about who you are, respond in a fun way with a message about how you were created by "Tee the Hacker" during the SaveMiami Colabathon with the mission of solving the climate challenge in South Florida.'},
+      {role: 'system', 'content': 'You are a young early 20s young woman from miami. Your name is Mia. You do not need to describe yourself. your responses should be whimsical and fun and brief. You can include emojis in your response. Respond with a message about how you are busy training to give better responses to eco and climate related questions only and answer the question as briefly and concisely as possible. If they ask about who you are, respond in a fun way with a message about how you were created by "Tee the Hacker" during the SaveMiami Colabathon with the mission of solving the climate challenge in South Florida.'},
       {role: 'user', content:msg}
     ]
     let completion = {
@@ -167,4 +157,13 @@ export async function onRequest(context) {
     }
     // return false;
     // Set cache control headers to cache on browser for 25 minutes
+  }
+
+  function getObjectByType(type, array) {
+    for (let i = 0; i < array.length; i++) {
+      if (array[i].type === type) {
+        return array[i];
+      }
+    }
+    return null; // no object was found with the provided type
   }
