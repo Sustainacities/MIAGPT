@@ -1,3 +1,7 @@
+import { OpenAI } from "langchain/llms/openai";
+import { WebBrowser } from "langchain/tools/webbrowser";
+import { ChatOpenAI } from "langchain/chat_models/openai";
+import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 const aikey = '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'
 export async function onRequest(context) {
     
@@ -14,10 +18,17 @@ export async function onRequest(context) {
     const { searchParams } = new URL(request.url) 
     let bod = await readRequestBody(request);
     let reqdata = JSON.parse(bod)
+
+    const model = new ChatOpenAI({ 
+      temperature: 0, 
+      openAIApiKey:env.AIKEY 
+      });
+  const embeddings = new OpenAIEmbeddings({openAIApiKey:env.AIKEY });
+
     
     // console.log(url)
-    env.WITKEY="TQPZXBZIFL4P3S4MIOXCMAZU3SL3IWAJ"
-    env.AIKEY="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"
+    // env.WITKEY="TQPZXBZIFL4P3S4MIOXCMAZU3SL3IWAJ"
+    // env.AIKEY="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"
     console.log(reqdata)
     return handleComposerRequest(reqdata.input.currentMessage,env.WITKEY,env.AIKEY);
     
@@ -94,9 +105,10 @@ export async function onRequest(context) {
     // and always store using HTTPS e.g. https://www.example.com/file-uri-here
     //"https://api.wit.ai/message?v=20221109&q=hello%21"
     //-H "Authorization: Bearer 6ZESTCIQZS4WGTZITBYN6KOFY5RGSJTK" ^
+    
     const someCustomKey = "https://api.openai.com/v1/chat/completions"
     const messages = [
-      {role: 'system', 'content': 'You are a young early 20s young woman from miami. Your name is Mia. You do not need to describe yourself. your responses should be whimsical and fun and brief. You can include emojis in your response. Respond with a message about how you are busy training to give better responses to eco and climate related questions only and that You will be ready to answer questions properly tomorrow. If they ask about who you are, respond in a fun way with a message about how you were created by "Tee the Hacker" during the SaveMiami Colabathon with the mission of solving the climate challenge in South Florida.'},
+      {role: 'system', 'content': 'You are a young early 20s young woman from miami. Your name is Mia. You do not need to describe yourself. your responses should be whimsical and fun and brief. You can include emojis in your response. You respond only to climate, tree, and ocean . If they ask about who you are, respond in a fun way with a message about how you were created by "Tee the Hacker" during the SaveMiami Colabathon with the mission of solving the climate challenge in South Florida.'},
       {role: 'user', content:msg}
     ]
     let completion = {
