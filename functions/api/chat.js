@@ -21,16 +21,16 @@ export async function onRequest(context) {
     let bod = await readRequestBody(request);
     let reqdata = JSON.parse(bod)
 
-    const model = new ChatOpenAI({ 
-      temperature: 0, 
-      openAIApiKey:env.AIKEY 
-      });
-  const embeddings = new OpenAIEmbeddings({openAIApiKey:env.AIKEY });
+  //   const model = new ChatOpenAI({ 
+  //     temperature: 0, 
+  //     openAIApiKey:"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" 
+  //     });
+  // const embeddings = new OpenAIEmbeddings({openAIApiKey:"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" });
 
     
     // console.log(url)
-    // env.WITKEY="TQPZXBZIFL4P3S4MIOXCMAZU3SL3IWAJ"
-    // env.AIKEY="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"
+    env.WITKEY="TQPZXBZIFL4P3S4MIOXCMAZU3SL3IWAJ"
+    env.AIKEY="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"
     console.log(reqdata)
     return handleComposerRequest(reqdata.input,env.WITKEY,env.AIKEY);
     
