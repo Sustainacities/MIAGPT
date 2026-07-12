@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="synthwave">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/assets/main.bundle.css">
+  <script src="/assets/main.bundle.js" defer></script>
+  <title>{{ title }} · Mia Miami Guide</title>
+  <meta name="description" content="Mia — Miami-Dade's trilingual AI community guide. Ask anything about Miami in English, Español, or Kreyòl.">
+  <meta name="theme-color" content="#00f5ff">
+  {% block head %}{% endblock %}
+</head>
+<body class="min-h-screen" style="background: radial-gradient(ellipse at 20% 50%, #050a2e 0%, #000 60%), radial-gradient(ellipse at 80% 20%, #0a1a3e 0%, transparent 50%); color: #d0f0ff;">
+
+  <!-- Subtle grid background -->
+  <div style="position:fixed;inset:0;pointer-events:none;z-index:0;
+    background-image: linear-gradient(rgba(0,245,255,0.03) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(0,245,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;"></div>
+
+  {% block body %}
+    <div class="relative z-10">
+      {{ content | safe }}
+    </div>
+  {% endblock %}
+
+</body>
+</html>

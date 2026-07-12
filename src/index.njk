@@ -1,0 +1,158 @@
+{# MiaGPT Landing Page #}
+{% set title = 'Mia · Miami-Dade AI Guide' %}
+{% extends "layout.njk" %}
+
+{% block body %}
+<main>
+  <style>
+    .holo-title {
+      font-size: clamp(3rem, 10vw, 7rem);
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #00f5ff 0%, #0066ff 50%, #ff2d95 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 40px rgba(0,245,255,0.35));
+      line-height: 1;
+    }
+    .holo-card {
+      background: rgba(0,10,30,0.7);
+      border: 1px solid rgba(0,245,255,0.15);
+      border-radius: 1.25rem;
+      backdrop-filter: blur(20px);
+      transition: all 0.3s;
+    }
+    .holo-card:hover { border-color: rgba(0,245,255,0.35); box-shadow: 0 0 30px rgba(0,245,255,0.1); }
+    .holo-btn {
+      background: linear-gradient(135deg, #00c4cc, #0055cc);
+      border: none;
+      border-radius: 0.875rem;
+      padding: 0.85rem 2rem;
+      font-weight: 700;
+      font-size: 1rem;
+      color: #fff;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 0 20px rgba(0,200,255,0.35);
+      transition: all 0.25s;
+    }
+    .holo-btn:hover { box-shadow: 0 0 35px rgba(0,200,255,0.6); transform: translateY(-2px); color: #fff; }
+    .holo-btn-ghost {
+      background: rgba(0,245,255,0.06);
+      border: 1px solid rgba(0,245,255,0.25);
+      border-radius: 0.875rem;
+      padding: 0.85rem 2rem;
+      font-weight: 600;
+      font-size: 1rem;
+      color: #00f5ff;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.25s;
+    }
+    .holo-btn-ghost:hover { background: rgba(0,245,255,0.12); color: #00f5ff; }
+    .feature-icon { font-size: 2rem; filter: drop-shadow(0 0 8px rgba(0,245,255,0.5)); }
+    .lang-badge {
+      background: rgba(0,245,255,0.08);
+      border: 1px solid rgba(0,245,255,0.2);
+      border-radius: 999px;
+      padding: 4px 14px;
+      font-size: 0.8rem;
+      color: #00f5ff;
+    }
+  </style>
+
+  <div class="min-h-screen flex flex-col" style="background: radial-gradient(ellipse at 20% 50%, #050a2e 0%, #000 60%); color:#d0f0ff;">
+    <!-- Grid bg -->
+    <div style="position:fixed;inset:0;pointer-events:none;
+      background-image: linear-gradient(rgba(0,245,255,0.025) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(0,245,255,0.025) 1px, transparent 1px);
+      background-size: 40px 40px;"></div>
+
+    <!-- Hero -->
+    <section class="relative z-10 flex flex-col items-center justify-center text-center px-4 pt-20 pb-16 gap-6">
+      <img src="/assets/mia.jpg" alt="Mia" class="rounded-full w-28 h-28 object-cover" style="
+        filter: drop-shadow(0 0 12px rgba(0,245,255,0.7)) saturate(0.8) hue-rotate(170deg) brightness(1.2);
+        border: 2px solid rgba(0,245,255,0.5);
+        box-shadow: 0 0 30px rgba(0,245,255,0.3);">
+
+      <div>
+        <div class="holo-title">MIA</div>
+        <p class="text-lg mt-2 font-mono" style="color:rgba(0,245,255,0.7);">Miami-Dade's Holographic AI Community Guide</p>
+      </div>
+
+      <div class="flex gap-3 flex-wrap justify-center">
+        <span class="lang-badge">🇺🇸 English</span>
+        <span class="lang-badge">🇪🇸 Español</span>
+        <span class="lang-badge">🇭🇹 Kreyòl</span>
+      </div>
+
+      <p class="max-w-xl text-sm" style="color:rgba(200,240,255,0.6);">
+        Ask Mia anything about Miami — transit, parks, permits, climate, services, open data, and more.
+        Powered by authoritative Miami-Dade County data and the OpenMiami ecosystem.
+      </p>
+
+      <div class="flex gap-4 flex-wrap justify-center">
+        <a href="/app/home" class="holo-btn">🌴 Talk to Mia</a>
+        <a href="https://github.com/sustainacities/miagpt" target="_blank" rel="noopener" class="holo-btn-ghost">⚡ Open Source</a>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="relative z-10 px-4 pb-16 max-w-4xl mx-auto w-full">
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <div class="holo-card p-5">
+          <div class="feature-icon mb-3">🌐</div>
+          <h3 class="font-bold mb-1" style="color:#00f5ff;">Trilingual Native</h3>
+          <p class="text-sm" style="color:rgba(200,240,255,0.6);">Speaks English, Spanish, and Haitian Creole. Detects your language automatically.</p>
+        </div>
+        <div class="holo-card p-5">
+          <div class="feature-icon mb-3">📊</div>
+          <h3 class="font-bold mb-1" style="color:#00f5ff;">Live Miami Data</h3>
+          <p class="text-sm" style="color:rgba(200,240,255,0.6);">Connected to Miami-Dade Open Data Portal, transit, parks, 311, permits, and more.</p>
+        </div>
+        <div class="holo-card p-5">
+          <div class="feature-icon mb-3">🕸️</div>
+          <h3 class="font-bold mb-1" style="color:#00f5ff;">Knowledge Graph</h3>
+          <p class="text-sm" style="color:rgba(200,240,255,0.6);">Builds a visual graph connecting Miami services, places, and topics as you chat.</p>
+        </div>
+        <div class="holo-card p-5">
+          <div class="feature-icon mb-3">🔊</div>
+          <h3 class="font-bold mb-1" style="color:#00f5ff;">Voice First</h3>
+          <p class="text-sm" style="color:rgba(200,240,255,0.6);">Mia speaks her responses aloud and can listen to your voice input — hands-free.</p>
+        </div>
+        <div class="holo-card p-5">
+          <div class="feature-icon mb-3">🔗</div>
+          <h3 class="font-bold mb-1" style="color:#00f5ff;">Authoritative Sources</h3>
+          <p class="text-sm" style="color:rgba(200,240,255,0.6);">Every answer comes with verified links to official Miami-Dade government sources.</p>
+        </div>
+        <div class="holo-card p-5">
+          <div class="feature-icon mb-3">🌿</div>
+          <h3 class="font-bold mb-1" style="color:#00f5ff;">Open Ecosystem</h3>
+          <p class="text-sm" style="color:rgba(200,240,255,0.6);">Built on OpenMiami, SustainaCities, and open civic data. Fully open source.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Ecosystem links -->
+    <section class="relative z-10 px-4 pb-20 max-w-3xl mx-auto w-full text-center">
+      <p class="text-xs font-mono mb-3" style="color:rgba(0,245,255,0.4); letter-spacing:0.15em; text-transform:uppercase;">Connected Ecosystem</p>
+      <div class="flex flex-wrap justify-center gap-3">
+        <a href="https://opendata.miamidade.gov" target="_blank" rel="noopener" class="lang-badge" style="text-decoration:none;">📊 Miami-Dade Open Data</a>
+        <a href="https://github.com/openmiami" target="_blank" rel="noopener" class="lang-badge" style="text-decoration:none;">⚡ OpenMiami</a>
+        <a href="https://github.com/sustainacities" target="_blank" rel="noopener" class="lang-badge" style="text-decoration:none;">🌿 SustainaCities</a>
+        <a href="https://311.miamidade.gov" target="_blank" rel="noopener" class="lang-badge" style="text-decoration:none;">📞 Miami 311</a>
+        <a href="https://www.miamidade.gov/transit/" target="_blank" rel="noopener" class="lang-badge" style="text-decoration:none;">🚇 MDT Transit</a>
+        <a href="https://resilientmiami.com" target="_blank" rel="noopener" class="lang-badge" style="text-decoration:none;">🌊 Resilient Miami</a>
+      </div>
+      <p class="mt-8 text-xs font-mono" style="color:rgba(200,240,255,0.25);">
+        Created by the MiamiVerse · SustainaCities initiative · Open source under MIT
+      </p>
+    </section>
+  </div>
+</main>
+{% endblock %}

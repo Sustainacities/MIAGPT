@@ -1,0 +1,436 @@
+<style>
+/* ── Mia Holographic Design System ──────────────────────────────────────── */
+:root {
+  --holo-cyan:    #00f5ff;
+  --holo-magenta: #ff2d95;
+  --holo-purple:  #7b2fff;
+  --holo-dark:    #080818;
+  --holo-panel:   rgba(0,10,30,0.85);
+}
+
+/* Avatar hologram ring */
+.mia-holo-ring {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  flex-shrink: 0;
+}
+.mia-holo-ring img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  filter: drop-shadow(0 0 8px var(--holo-cyan))
+          drop-shadow(0 0 16px rgba(0,245,255,0.4))
+          saturate(0.8) hue-rotate(170deg) brightness(1.15);
+  animation: holo-flicker 5s infinite;
+}
+/* scanlines overlay */
+.mia-holo-ring::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 3px,
+    rgba(0,245,255,0.06) 3px, rgba(0,245,255,0.06) 4px
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+/* animated glow ring */
+.mia-holo-ring::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid rgba(0,245,255,0.7);
+  box-shadow: 0 0 12px rgba(0,245,255,0.6), 0 0 28px rgba(0,245,255,0.25),
+              inset 0 0 12px rgba(0,245,255,0.1);
+  animation: ring-pulse 2.4s infinite;
+}
+@keyframes ring-pulse {
+  0%,100% { box-shadow: 0 0 12px rgba(0,245,255,0.6), 0 0 28px rgba(0,245,255,0.25); transform: scale(1); }
+  50%      { box-shadow: 0 0 22px rgba(0,245,255,0.9), 0 0 48px rgba(0,245,255,0.45); transform: scale(1.03); }
+}
+@keyframes holo-flicker {
+  0%,87%,100% { opacity: 1; }
+  89% { opacity: 0.82; } 90% { opacity: 1; }
+  93% { opacity: 0.88; } 94% { opacity: 1; }
+}
+
+/* Orbiting particles */
+.mia-orbit {
+  position: absolute;
+  inset: -20px;
+  border-radius: 50%;
+  border: 1px dashed rgba(0,245,255,0.2);
+  animation: orbit-spin 8s linear infinite;
+}
+.mia-orbit::before {
+  content: '◆';
+  position: absolute;
+  top: -5px; left: 50%;
+  transform: translateX(-50%);
+  color: var(--holo-cyan);
+  font-size: 8px;
+  filter: drop-shadow(0 0 4px var(--holo-cyan));
+}
+@keyframes orbit-spin { to { transform: rotate(360deg); } }
+.mia-orbit-2 {
+  inset: -30px;
+  border-color: rgba(255,45,149,0.15);
+  animation: orbit-spin 12s linear infinite reverse;
+}
+.mia-orbit-2::before { content: '●'; color: var(--holo-magenta); font-size: 6px; }
+
+/* Language badge */
+.lang-flag {
+  font-size: 1.4rem;
+  opacity: 0.35;
+  transition: all 0.3s;
+  cursor: default;
+}
+.lang-flag.active { opacity: 1; filter: drop-shadow(0 0 6px rgba(0,245,255,0.8)); transform: scale(1.25); }
+
+/* Status dot */
+.status-dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  background: #00ff88;
+  border-radius: 50%;
+  box-shadow: 0 0 6px #00ff88;
+  animation: blink-dot 2s infinite;
+}
+@keyframes blink-dot { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+
+/* Chat panel */
+.mia-chat-panel {
+  background: var(--holo-panel);
+  border: 1px solid rgba(0,245,255,0.15);
+  border-radius: 1rem;
+  backdrop-filter: blur(16px);
+}
+.mia-chat-panel::-webkit-scrollbar { width: 4px; }
+.mia-chat-panel::-webkit-scrollbar-track { background: transparent; }
+.mia-chat-panel::-webkit-scrollbar-thumb { background: rgba(0,245,255,0.3); border-radius: 2px; }
+
+/* Bubble */
+.bubble-mia {
+  background: linear-gradient(135deg, rgba(0,245,255,0.1), rgba(0,30,60,0.9));
+  border: 1px solid rgba(0,245,255,0.25);
+  border-radius: 0 1rem 1rem 1rem;
+  box-shadow: 0 0 20px rgba(0,245,255,0.06);
+}
+.bubble-me {
+  background: linear-gradient(135deg, rgba(123,47,255,0.25), rgba(60,0,100,0.8));
+  border: 1px solid rgba(123,47,255,0.3);
+  border-radius: 1rem 0 1rem 1rem;
+}
+
+/* Source chip */
+.source-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0,245,255,0.08);
+  border: 1px solid rgba(0,245,255,0.2);
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 0.72rem;
+  color: var(--holo-cyan);
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.source-chip:hover {
+  background: rgba(0,245,255,0.18);
+  box-shadow: 0 0 8px rgba(0,245,255,0.3);
+}
+
+/* Quick link button */
+.quick-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255,45,149,0.1);
+  border: 1px solid rgba(255,45,149,0.3);
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-size: 0.72rem;
+  color: #ff6eb7;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.quick-link:hover { background: rgba(255,45,149,0.22); box-shadow: 0 0 8px rgba(255,45,149,0.3); }
+
+/* Input area */
+.mia-input {
+  background: rgba(0,10,30,0.9);
+  border: 1px solid rgba(0,245,255,0.2);
+  border-radius: 0.75rem;
+  color: #e0f8ff;
+  resize: none;
+  transition: border-color 0.2s;
+}
+.mia-input:focus { outline: none; border-color: rgba(0,245,255,0.6); box-shadow: 0 0 12px rgba(0,245,255,0.15); }
+.mia-input::placeholder { color: rgba(0,245,255,0.3); }
+
+/* Send button */
+.btn-mia-send {
+  background: linear-gradient(135deg, #00c4cc, #0066ff);
+  border: none;
+  border-radius: 0.75rem;
+  color: #fff;
+  font-weight: 700;
+  padding: 0 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 0 12px rgba(0,200,255,0.3);
+}
+.btn-mia-send:hover:not(:disabled) { box-shadow: 0 0 22px rgba(0,200,255,0.6); transform: translateY(-1px); }
+.btn-mia-send:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-mia-icon {
+  background: rgba(0,245,255,0.08);
+  border: 1px solid rgba(0,245,255,0.2);
+  border-radius: 0.75rem;
+  color: var(--holo-cyan);
+  padding: 0 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 1.1rem;
+}
+.btn-mia-icon:hover { background: rgba(0,245,255,0.18); }
+.btn-mia-icon.active { border-color: rgba(255,45,149,0.6); color: var(--holo-magenta); background: rgba(255,45,149,0.1); }
+
+/* Graph panel */
+.graph-panel {
+  background: rgba(0,5,20,0.9);
+  border: 1px solid rgba(0,245,255,0.12);
+  border-radius: 1rem;
+  overflow: hidden;
+}
+#mia-graph-canvas {
+  width: 100%; height: 220px;
+  display: block;
+}
+
+/* Loading beam */
+.loading-beam {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--holo-cyan), var(--holo-magenta), transparent);
+  background-size: 200% 100%;
+  animation: beam-scan 1.2s linear infinite;
+  border-radius: 2px;
+}
+@keyframes beam-scan {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Typing dots */
+.typing-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--holo-cyan);
+  animation: tdot 1.2s infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes tdot { 0%,60%,100% { transform: translateY(0); opacity:0.4; } 30% { transform: translateY(-6px); opacity:1; } }
+
+/* Mia section header */
+.holo-section-label {
+  font-size: 0.65rem;
+  font-family: monospace;
+  letter-spacing: 0.15em;
+  color: rgba(0,245,255,0.5);
+  text-transform: uppercase;
+}
+
+/* Graph toggle button */
+.graph-toggle {
+  font-size: 0.72rem;
+  font-family: monospace;
+  color: rgba(0,245,255,0.6);
+  background: none;
+  border: 1px solid rgba(0,245,255,0.2);
+  border-radius: 999px;
+  padding: 2px 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.graph-toggle:hover { background: rgba(0,245,255,0.1); color: var(--holo-cyan); }
+</style>
+
+<div x-data="miaChat" x-init="init()" class="max-w-3xl mx-auto px-3 py-4 flex flex-col gap-4" style="min-height:100vh; color:#d0f0ff;">
+
+  <!-- ── Mia Header ────────────────────────────────────────────────────────── -->
+  <div class="flex items-center gap-5 px-4 py-3 rounded-2xl" style="background:rgba(0,10,30,0.75); border:1px solid rgba(0,245,255,0.12);">
+    <!-- Holographic avatar -->
+    <div class="mia-holo-ring" style="position:relative;">
+      <div class="mia-orbit"></div>
+      <div class="mia-orbit mia-orbit-2"></div>
+      <img src="/assets/mia.jpg" alt="Mia" />
+    </div>
+
+    <!-- Name & status -->
+    <div class="flex-1">
+      <div class="flex items-center gap-2">
+        <h1 class="text-2xl font-black tracking-wider" style="color:var(--holo-cyan); text-shadow:0 0 12px rgba(0,245,255,0.6);">MIA</h1>
+        <span class="text-xs font-mono" style="color:rgba(0,245,255,0.4);">v2.0 · MiamiVerse</span>
+      </div>
+      <p class="text-xs font-mono" style="color:rgba(200,240,255,0.55);">Miami-Dade Community AI Guide</p>
+      <p class="text-xs font-mono mt-1" style="color:rgba(200,240,255,0.4);">Trilingual · Data-Connected · Holographic</p>
+    </div>
+
+    <!-- Language flags + status -->
+    <div class="flex flex-col items-end gap-2">
+      <div class="flex items-center gap-1">
+        <span class="status-dot"></span>
+        <span class="text-xs font-mono" style="color:#00ff88;">Online</span>
+      </div>
+      <div class="flex gap-2">
+        <span class="lang-flag" :class="{ active: lang === 'en' }" title="English">🇺🇸</span>
+        <span class="lang-flag" :class="{ active: lang === 'es' }" title="Español">🇪🇸</span>
+        <span class="lang-flag" :class="{ active: lang === 'ht' }" title="Kreyòl">🇭🇹</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Chat Messages ─────────────────────────────────────────────────────── -->
+  <div id="chat-scroll" class="mia-chat-panel flex flex-col gap-3 p-4 overflow-y-auto" style="height:420px; max-height:55vh;">
+
+    <!-- Welcome message -->
+    <template x-if="chats.length === 0">
+      <div class="flex flex-col items-center justify-center h-full gap-3 text-center">
+        <div style="font-size:3rem; filter:drop-shadow(0 0 12px rgba(0,245,255,0.7));">🌴</div>
+        <p class="font-bold" style="color:var(--holo-cyan);">Hey! I'm Mia 👋</p>
+        <p class="text-sm" style="color:rgba(200,240,255,0.6);">Ask me anything about Miami-Dade — in English, Español, or Kreyòl!</p>
+        <div class="flex flex-wrap justify-center gap-2 mt-2">
+          <button @click="currentMessage='What are the best parks in Miami-Dade?'; sendMessage()" class="source-chip cursor-pointer">🌳 Parks near me</button>
+          <button @click="currentMessage='How do I ride the Metrorail?'; sendMessage()" class="source-chip cursor-pointer">🚇 Transit guide</button>
+          <button @click="currentMessage='¿Dónde puedo solicitar un permiso de construcción?'; sendMessage()" class="source-chip cursor-pointer">🏗️ Permisos</button>
+          <button @click="currentMessage='Kote mwen ka jwenn sèvis sante nan Miami-Dade?'; sendMessage()" class="source-chip cursor-pointer">🏥 Sèvis sante</button>
+          <button @click="currentMessage='What open datasets does Miami-Dade have?'; sendMessage()" class="source-chip cursor-pointer">📊 Open Data</button>
+          <button @click="currentMessage='Tell me about climate resilience in Miami'; sendMessage()" class="source-chip cursor-pointer">🌊 Climate</button>
+        </div>
+      </div>
+    </template>
+
+    <!-- Chat history -->
+    <template x-for="(chat, idx) in chats" :key="idx">
+      <div :class="chat.from === 'me' ? 'flex justify-end' : 'flex justify-start'">
+        <div class="max-w-xs sm:max-w-md" :class="chat.from === 'me' ? 'items-end' : 'items-start'" style="display:flex;flex-direction:column;gap:6px;">
+
+          <!-- Bubble -->
+          <div class="px-4 py-3 text-sm" :class="chat.from === 'me' ? 'bubble-me' : 'bubble-mia'" style="white-space:pre-wrap;word-break:break-word;">
+            <span x-text="chat.message"></span>
+          </div>
+
+          <!-- Sources (Mia only) -->
+          <template x-if="chat.from === 'mia' && chat.sources && chat.sources.length > 0">
+            <div class="flex flex-wrap gap-1 px-1">
+              <span class="holo-section-label w-full">Sources</span>
+              <template x-for="src in chat.sources" :key="src.url">
+                <a :href="src.url" target="_blank" rel="noopener" class="source-chip" :title="src.description">
+                  🔗 <span x-text="src.title"></span>
+                </a>
+              </template>
+            </div>
+          </template>
+
+          <!-- Quick links (Mia only) -->
+          <template x-if="chat.from === 'mia' && chat.quickLinks && chat.quickLinks.length > 0">
+            <div class="flex flex-wrap gap-1 px-1">
+              <template x-for="ql in chat.quickLinks" :key="ql.url">
+                <a :href="ql.url" target="_blank" rel="noopener" class="quick-link">
+                  ↗ <span x-text="ql.label"></span>
+                </a>
+              </template>
+            </div>
+          </template>
+
+        </div>
+      </div>
+    </template>
+
+    <!-- Typing indicator -->
+    <template x-if="loading">
+      <div class="flex justify-start">
+        <div class="bubble-mia px-4 py-3 flex gap-2 items-center">
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+        </div>
+      </div>
+    </template>
+
+  </div>
+
+  <!-- Loading beam -->
+  <div x-show="loading" class="loading-beam -mt-2"></div>
+
+  <!-- ── Input Area ────────────────────────────────────────────────────────── -->
+  <div class="flex gap-2 items-end">
+    <textarea
+      x-model="currentMessage"
+      @keydown.enter.exact.prevent="sendMessage()"
+      @keydown.enter.shift.exact="currentMessage += '\n'"
+      class="mia-input flex-1 text-sm px-4 py-3"
+      rows="2"
+      placeholder="Ask Mia about Miami... / Pregunta sobre Miami... / Poze Mia kesyon..."
+      :disabled="loading"
+    ></textarea>
+
+    <button @click="toggleListen()" class="btn-mia-icon h-full py-3" :class="{ active: listening }" title="Voice input">
+      <span x-text="listening ? '🔴' : '🎤'"></span>
+    </button>
+
+    <button @click="toggleVoice()" class="btn-mia-icon h-full py-3" :title="voiceOn ? 'Mute Mia' : 'Unmute Mia'">
+      <span x-text="voiceOn ? '🔊' : '🔇'"></span>
+    </button>
+
+    <button @click="sendMessage()" :disabled="loading || !currentMessage.trim()" class="btn-mia-send h-full">
+      <span x-show="!loading">Send ↗</span>
+      <span x-show="loading">…</span>
+    </button>
+  </div>
+
+  <!-- ── Knowledge Graph Panel ─────────────────────────────────────────────── -->
+  <div>
+    <div class="flex items-center justify-between mb-2">
+      <span class="holo-section-label">Knowledge Graph · MiamiVerse</span>
+      <div class="flex gap-2">
+        <button @click="showGraph = !showGraph" class="graph-toggle" x-text="showGraph ? '▲ Hide graph' : '▼ Show graph'"></button>
+        <button @click="clearHistory()" class="graph-toggle" style="color:rgba(255,100,100,0.6); border-color:rgba(255,100,100,0.2);">✕ Clear</button>
+      </div>
+    </div>
+
+    <div x-show="showGraph" x-transition class="graph-panel">
+      <canvas id="mia-graph-canvas"></canvas>
+      <div class="px-4 py-2 flex flex-wrap gap-3" style="border-top:1px solid rgba(0,245,255,0.08);">
+        <span class="holo-section-label flex items-center gap-1"><span style="color:#00f5ff;">●</span> Place</span>
+        <span class="holo-section-label flex items-center gap-1"><span style="color:#ff6b35;">●</span> Service</span>
+        <span class="holo-section-label flex items-center gap-1"><span style="color:#9b59b6;">●</span> Dept</span>
+        <span class="holo-section-label flex items-center gap-1"><span style="color:#2ecc71;">●</span> Topic</span>
+        <span class="holo-section-label flex items-center gap-1"><span style="color:#e74c3c;">●</span> Dataset</span>
+        <span class="holo-section-label ml-auto" x-text="'Nodes: ' + $store.mia.graphNodes.length + ' · Edges: ' + $store.mia.graphEdges.length"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Ecosystem Links ───────────────────────────────────────────────────── -->
+  <div class="px-1">
+    <div class="holo-section-label mb-2">Connected Ecosystem</div>
+    <div class="flex flex-wrap gap-2">
+      <a href="https://opendata.miamidade.gov" target="_blank" rel="noopener" class="source-chip">📊 Miami-Dade Open Data</a>
+      <a href="https://github.com/openmiami" target="_blank" rel="noopener" class="source-chip">⚡ OpenMiami</a>
+      <a href="https://github.com/sustainacities" target="_blank" rel="noopener" class="source-chip">🌿 SustainaCities</a>
+      <a href="https://github.com/sustainacities/miagpt" target="_blank" rel="noopener" class="source-chip">🤖 MiaGPT</a>
+      <a href="https://311.miamidade.gov" target="_blank" rel="noopener" class="source-chip">📞 311</a>
+      <a href="https://www.miamidade.gov/transit/" target="_blank" rel="noopener" class="source-chip">🚇 Transit</a>
+    </div>
+  </div>
+
+</div>
