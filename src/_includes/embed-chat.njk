@@ -1,0 +1,506 @@
+<style>
+/* ─── Token system ─────────────────────────────────────────────────────────── */
+:root {
+  --bg:          #0B0A12;
+  --surface:     #141320;
+  --surface-2:   #1C1B2A;
+  --surface-3:   #242233;
+  --border:      rgba(255,255,255,0.06);
+  --border-2:    rgba(255,255,255,0.10);
+  --border-acc:  rgba(240,100,74,0.22);
+  --ink:         #F0EDE8;
+  --ink-2:       #8A8492;
+  --ink-3:       #4E4B58;
+  --accent:      #F0644A;
+  --accent-dim:  rgba(240,100,74,0.13);
+  --teal:        #38B4C8;
+  --teal-dim:    rgba(56,180,200,0.09);
+  --ok:          #3DBE6E;
+  --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 20px;
+}
+@media (prefers-color-scheme: light) { :root {
+  --bg:#F5F3EF; --surface:#FFFFFF; --surface-2:#F0ECE7; --surface-3:#E8E3DD;
+  --border:rgba(0,0,0,0.07); --border-2:rgba(0,0,0,0.11); --border-acc:rgba(240,100,74,0.25);
+  --ink:#18161F; --ink-2:#6A6774; --ink-3:#AAA6B4;
+}}
+:root[data-theme="dark"] {
+  --bg:#0B0A12; --surface:#141320; --surface-2:#1C1B2A; --surface-3:#242233;
+  --border:rgba(255,255,255,0.06); --border-2:rgba(255,255,255,0.10); --border-acc:rgba(240,100,74,0.22);
+  --ink:#F0EDE8; --ink-2:#8A8492; --ink-3:#4E4B58;
+}
+:root[data-theme="light"] {
+  --bg:#F5F3EF; --surface:#FFFFFF; --surface-2:#F0ECE7; --surface-3:#E8E3DD;
+  --border:rgba(0,0,0,0.07); --border-2:rgba(0,0,0,0.11); --border-acc:rgba(240,100,74,0.25);
+  --ink:#18161F; --ink-2:#6A6774; --ink-3:#AAA6B4;
+}
+
+/* ─── Reset ─────────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', system-ui, sans-serif;
+  font-size: 15px; line-height: 1.6;
+  background: var(--bg); color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+textarea { font-family: inherit; }
+
+/* ─── Embed shell ────────────────────────────────────────────────────────────── */
+.embed { display: flex; flex-direction: column; height: 100vh; overflow: hidden; background: var(--bg); }
+
+/* ─── Topbar ─────────────────────────────────────────────────────────────────── */
+.embed-topbar {
+  flex-shrink: 0; height: 48px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 16px; gap: 9px;
+  background: var(--surface);
+}
+.embed-avatar { position: relative; width: 28px; height: 28px; flex-shrink: 0; }
+.embed-halo {
+  position: absolute; inset: -2px; border-radius: 50%;
+  background: conic-gradient(from 0deg, #F0644A, #F5A462, #E8C96D, #F5A462, #F0644A);
+  animation: halo-turn 10s linear infinite;
+}
+@keyframes halo-turn { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .embed-halo { animation: none; } }
+.embed-avatar-inner { position: absolute; inset: 2px; border-radius: 50%; overflow: hidden; background: var(--bg); }
+.embed-avatar-inner img { width: 100%; height: 100%; object-fit: cover; filter: saturate(0.88); display: block; }
+.embed-title { font-size: 13px; font-weight: 700; color: var(--ink); letter-spacing: 0.02em; }
+.embed-sub { font-size: 10px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-3); }
+.embed-topbar-actions { margin-left: auto; display: flex; gap: 5px; }
+.topbar-btn {
+  width: 26px; height: 26px; border-radius: var(--r-sm);
+  border: 1px solid var(--border); background: transparent; color: var(--ink-3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; cursor: pointer; transition: all 0.15s;
+}
+.topbar-btn:hover { background: var(--surface-2); color: var(--ink-2); }
+.topbar-btn.muted { color: var(--accent); background: var(--accent-dim); border-color: var(--border-acc); }
+
+/* Loading bar */
+.load-bar {
+  position: relative; height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--accent) 40%, var(--teal) 60%, transparent 100%);
+  background-size: 200% 100%; animation: lscan 1.1s ease-in-out infinite;
+  opacity: 0; transition: opacity 0.2s; pointer-events: none;
+}
+.load-bar.on { opacity: 1; }
+@keyframes lscan { 0% { background-position: 200% 0; } 100% { background-position: -100% 0; } }
+
+/* Messages */
+.messages { flex: 1; overflow-y: auto; padding: 16px 0 6px; }
+.messages::-webkit-scrollbar { width: 3px; }
+.messages::-webkit-scrollbar-track { background: transparent; }
+.messages::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 2px; }
+
+.msg-row { padding: 3px 14px; }
+.msg-row.gap { margin-top: 10px; }
+.msg-inner { display: flex; gap: 8px; }
+.msg-inner.me { flex-direction: row-reverse; }
+
+.msg-avatar { width: 24px; height: 24px; border-radius: 50%; overflow: hidden; flex-shrink: 0; margin-top: 2px; background: var(--surface-2); }
+.msg-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.msg-avatar-me {
+  width: 24px; height: 24px; border-radius: 50%; background: var(--surface-3);
+  border: 1px solid var(--border-2); display: flex; align-items: center; justify-content: center;
+  font-size: 10px; flex-shrink: 0; margin-top: 2px; color: var(--ink-3);
+}
+
+.msg-body { flex: 1; min-width: 0; }
+.msg-inner.me .msg-body { display: flex; flex-direction: column; align-items: flex-end; }
+
+.bubble {
+  display: inline-block; padding: 8px 12px; border-radius: var(--r-lg);
+  font-size: 13px; line-height: 1.65; max-width: 100%; word-break: break-word;
+}
+.bubble-mia { background: var(--surface); border: 1px solid var(--border); border-top-left-radius: 4px; color: var(--ink); }
+.bubble-me  { background: var(--surface-3); border: 1px solid var(--border-2); border-top-right-radius: 4px; color: var(--ink); }
+
+/* Sources */
+.msg-sources { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.src-chip {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 9.5px; color: var(--teal); text-decoration: none;
+  background: var(--teal-dim); border: 1px solid rgba(56,180,200,0.12);
+  border-radius: 999px; padding: 1px 7px;
+  transition: all 0.15s;
+  font-family: 'SF Mono', 'Cascadia Code', Consolas, monospace; letter-spacing: 0.02em;
+}
+.src-chip:hover { background: rgba(56,180,200,0.16); border-color: rgba(56,180,200,0.28); }
+.src-chip .dot { font-size: 6px; opacity: 0.55; }
+
+/* Quick links */
+.msg-qlinks { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+.ql-btn {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 10px; font-weight: 500; color: var(--accent); text-decoration: none;
+  background: var(--accent-dim); border: 1px solid var(--border-acc);
+  border-radius: var(--r-sm); padding: 2px 8px; transition: all 0.15s; letter-spacing: 0.01em;
+}
+.ql-btn:hover { background: rgba(240,100,74,0.2); }
+.ql-arrow { width: 9px; height: 9px; flex-shrink: 0; opacity: 0.65; }
+
+/* Typing */
+.typing-row { padding: 3px 14px; margin-top: 8px; }
+.typing-inner { display: flex; gap: 8px; }
+.typing-bubble {
+  display: inline-flex; align-items: center; gap: 4px; padding: 8px 12px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-lg); border-top-left-radius: 4px;
+}
+.td { width: 4px; height: 4px; border-radius: 50%; background: var(--ink-3); animation: td 1.2s ease infinite; }
+.td:nth-child(2) { animation-delay: 0.12s; }
+.td:nth-child(3) { animation-delay: 0.24s; }
+@keyframes td { 0%,60%,100% { transform: translateY(0); opacity: 0.25; } 30% { transform: translateY(-4px); opacity: 1; } }
+
+/* ─── Empty state ────────────────────────────────────────────────────────────── */
+.empty {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 14px; padding: 16px 20px; text-align: center;
+}
+.empty-avatar { position: relative; width: 52px; height: 52px; }
+.empty-halo {
+  position: absolute; inset: -3px; border-radius: 50%;
+  background: conic-gradient(from 0deg, #F0644A, #F5A462, #E8C96D, #F5A462, #F0644A);
+  animation: halo-turn 10s linear infinite; opacity: 0.7;
+}
+.empty-img { position: absolute; inset: 3px; border-radius: 50%; overflow: hidden; }
+.empty-img img { width: 100%; height: 100%; object-fit: cover; filter: saturate(0.88); display: block; }
+.empty-h { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; color: var(--ink); }
+.empty-p { font-size: 12px; color: var(--ink-2); max-width: 280px; line-height: 1.65; }
+
+.starters { display: flex; flex-direction: column; gap: 5px; width: 100%; max-width: 340px; }
+.starter {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-md); padding: 8px 12px;
+  text-align: left; cursor: pointer; transition: background 0.15s, border-color 0.15s;
+  display: flex; align-items: center; gap: 8px;
+}
+.starter:hover { background: var(--surface-2); border-color: var(--border-2); }
+.starter-label { font-size: 12px; color: var(--ink); font-weight: 500; }
+
+/* ─── Input ──────────────────────────────────────────────────────────────────── */
+.input-area { flex-shrink: 0; padding: 0 12px 14px; }
+.input-shell {
+  background: var(--surface); border: 1px solid var(--border-2);
+  border-radius: var(--r-xl); overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.input-shell:focus-within {
+  border-color: var(--border-acc);
+  box-shadow: 0 0 0 3px rgba(240,100,74,0.07);
+}
+.input-field {
+  width: 100%; background: transparent; border: none; outline: none;
+  padding: 11px 15px 5px; color: var(--ink); font-size: 13px; font-family: inherit;
+  line-height: 1.6; resize: none; min-height: 42px; max-height: 110px; display: block;
+}
+.input-field::placeholder { color: var(--ink-3); }
+.input-toolbar { display: flex; align-items: center; padding: 4px 8px 8px; gap: 4px; }
+.toolbar-hint {
+  font-size: 9px; color: var(--ink-3); margin-right: auto; padding-left: 5px;
+  font-family: 'SF Mono', Consolas, monospace; letter-spacing: 0.03em;
+}
+.ibutton {
+  width: 27px; height: 27px; border-radius: var(--r-sm);
+  border: 1px solid var(--border); background: transparent; color: var(--ink-3);
+  display: flex; align-items: center; justify-content: center; font-size: 13px;
+  cursor: pointer; transition: all 0.15s;
+}
+.ibutton:hover { background: var(--surface-2); color: var(--ink-2); border-color: var(--border-2); }
+.ibutton.active { background: var(--accent-dim); color: var(--accent); border-color: var(--border-acc); }
+.btn-send {
+  height: 27px; padding: 0 12px; border-radius: var(--r-sm);
+  background: var(--accent); border: none; color: #fff;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  cursor: pointer; transition: background 0.15s, transform 0.1s;
+  display: flex; align-items: center; gap: 4px;
+}
+.btn-send:hover { background: #e05840; transform: translateY(-1px); }
+.btn-send:active { transform: translateY(0); }
+.btn-send:disabled { opacity: 0.38; cursor: not-allowed; transform: none; }
+
+/* ─── Branding footer ────────────────────────────────────────────────────────── */
+.embed-brand {
+  flex-shrink: 0; text-align: center; padding: 5px 0 8px;
+  font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--ink-3); font-family: 'SF Mono', Consolas, monospace;
+}
+.embed-brand a { color: var(--ink-3); text-decoration: none; transition: color 0.15s; }
+.embed-brand a:hover { color: var(--teal); }
+</style>
+
+<div class="embed">
+
+  <!-- Topbar -->
+  <div class="embed-topbar">
+    <div class="embed-avatar">
+      <div class="embed-halo"></div>
+      <div class="embed-avatar-inner">
+        <img src="/assets/mia.jpg" alt="Mia"
+          onerror="this.style.display='none';this.parentNode.style.background='#F0644A'">
+      </div>
+    </div>
+    <div>
+      <div class="embed-title">Mia</div>
+      <div class="embed-sub">Miami-Dade Guide</div>
+    </div>
+    <div class="embed-topbar-actions">
+      <button class="topbar-btn" id="voice-btn" title="Toggle voice">🔊</button>
+      <button class="topbar-btn" id="mic-btn" title="Voice input">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="12" height="12">
+          <rect x="5" y="1" width="6" height="9" rx="3"/>
+          <path d="M2 8a6 6 0 0 0 12 0M8 14v2"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="load-bar" id="load-bar"></div>
+
+  <!-- Messages -->
+  <div class="messages" id="messages">
+    <div class="empty" id="empty-state">
+      <div class="empty-avatar">
+        <div class="empty-halo"></div>
+        <div class="empty-img">
+          <img src="/assets/mia.jpg" alt="Mia"
+            onerror="this.style.display='none';this.parentNode.style.background='#F0644A'">
+        </div>
+      </div>
+      <h1 class="empty-h">Hey, I'm Mia 👋</h1>
+      <p class="empty-p">Ask me anything about Miami-Dade in English, Español, or Kreyòl.</p>
+      <div class="starters">
+        <button class="starter" onclick="mia.prompt('What are the best parks in Miami-Dade?')">
+          <span>🌳</span><span class="starter-label">Parks &amp; Beaches near me</span>
+        </button>
+        <button class="starter" onclick="mia.prompt('How do I ride the Metrorail?')">
+          <span>🚇</span><span class="starter-label">Transit &amp; Metrorail guide</span>
+        </button>
+        <button class="starter" onclick="mia.prompt('¿Dónde solicito un permiso de construcción?')">
+          <span>🏗️</span><span class="starter-label">Permisos de construcción</span>
+        </button>
+        <button class="starter" onclick="mia.prompt('Tell me about climate resilience in Miami')">
+          <span>🌊</span><span class="starter-label">Climate &amp; resilience</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input -->
+  <div class="input-area">
+    <div class="input-shell">
+      <textarea class="input-field" id="mia-input" rows="1" placeholder="Ask Mia about Miami-Dade…"></textarea>
+      <div class="input-toolbar">
+        <span class="toolbar-hint">↵ send · ⇧↵ newline</span>
+        <button class="ibutton" id="mic-input-btn" title="Voice input">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="12" height="12">
+            <rect x="5" y="1" width="6" height="9" rx="3"/>
+            <path d="M2 8a6 6 0 0 0 12 0M8 14v2"/>
+          </svg>
+        </button>
+        <button class="btn-send" id="send-btn">
+          Send
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" width="9" height="9">
+            <path d="M2 10 L10 2 M4 2 H10 V8"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="embed-brand">
+    Powered by <a href="https://github.com/sustainacities/miagpt" target="_blank" rel="noopener">MiaGPT</a>
+    &amp; Miami-Dade Open Data
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────────
+const CHATS_KEY  = 'mia_embed_chats_v1';
+const VOICE_LANGS = { en:'en-US', es:'es-US', ht:'fr-HT' };
+let state = {
+  chats:   JSON.parse(localStorage.getItem(CHATS_KEY) || '[]'),
+  lang:    'en',
+  voiceOn: true,
+  loading: false,
+};
+let recognition = null;
+
+// ── DOM ────────────────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const msgsEl  = $('messages');
+const emptyEl = $('empty-state');
+const inputEl = $('mia-input');
+const sendBtn = $('send-btn');
+const loadBar = $('load-bar');
+
+// ── Boot ───────────────────────────────────────────────────────────────────────
+function boot() {
+  if (state.chats.length) {
+    emptyEl.style.display = 'none';
+    state.chats.forEach(c => renderMsg(c, false));
+  }
+  syncVoiceBtn();
+}
+
+// ── Render message ─────────────────────────────────────────────────────────────
+function renderMsg(chat, scroll = true) {
+  emptyEl.style.display = 'none';
+  const isMe = chat.from === 'me';
+  const row  = document.createElement('div');
+  row.className = 'msg-row gap';
+
+  const inner = document.createElement('div');
+  inner.className = 'msg-inner' + (isMe ? ' me' : '');
+
+  const av = document.createElement('div');
+  av.className = isMe ? 'msg-avatar-me' : 'msg-avatar';
+  if (!isMe) {
+    av.innerHTML = '<img src="/assets/mia.jpg" alt="Mia" onerror="this.style.display=\'none\';this.parentNode.style.background=\'#F0644A\'">';
+  } else {
+    av.textContent = '👤';
+  }
+  inner.appendChild(av);
+
+  const body = document.createElement('div');
+  body.className = 'msg-body';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble ' + (isMe ? 'bubble-me' : 'bubble-mia');
+  bubble.textContent = chat.message;
+  body.appendChild(bubble);
+
+  if (!isMe) {
+    if (chat.sources?.length) {
+      const srcs = document.createElement('div');
+      srcs.className = 'msg-sources';
+      chat.sources.forEach(s => {
+        const a = document.createElement('a');
+        a.className = 'src-chip'; a.href = s.url; a.target = '_blank'; a.rel = 'noopener';
+        a.title = s.description || ''; a.innerHTML = `<span class="dot">●</span>${s.title}`;
+        srcs.appendChild(a);
+      });
+      body.appendChild(srcs);
+    }
+    if (chat.quickLinks?.length) {
+      const qls = document.createElement('div'); qls.className = 'msg-qlinks';
+      chat.quickLinks.forEach(q => {
+        const a = document.createElement('a');
+        a.className = 'ql-btn'; a.href = q.url; a.target = '_blank'; a.rel = 'noopener';
+        a.innerHTML = `<svg class="ql-arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 10 L10 2 M4 2 H10 V8"/></svg>${q.label}`;
+        qls.appendChild(a);
+      });
+      body.appendChild(qls);
+    }
+  }
+
+  inner.appendChild(body);
+  row.appendChild(inner);
+  msgsEl.appendChild(row);
+  if (scroll) row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ── Typing indicator ───────────────────────────────────────────────────────────
+let typingEl = null;
+function showTyping() {
+  typingEl = document.createElement('div'); typingEl.className = 'typing-row';
+  typingEl.innerHTML = `<div class="typing-inner"><div class="msg-avatar"><img src="/assets/mia.jpg" alt="" onerror="this.style.display='none';this.parentNode.style.background='#F0644A'"></div><div class="typing-bubble"><div class="td"></div><div class="td"></div><div class="td"></div></div></div>`;
+  msgsEl.appendChild(typingEl); typingEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+function hideTyping() { typingEl?.remove(); typingEl = null; }
+
+// ── Send ───────────────────────────────────────────────────────────────────────
+async function send() {
+  const text = inputEl.value.trim();
+  if (!text || state.loading) return;
+  inputEl.value = ''; autoGrow();
+  state.loading = true; sendBtn.disabled = true; loadBar.classList.add('on');
+
+  const meMsg = { from: 'me', message: text };
+  state.chats.push(meMsg); renderMsg(meMsg); showTyping();
+
+  try {
+    const res  = await fetch('/api/chat', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ input: { currentMessage: text } })
+    });
+    const data = await res.json();
+    hideTyping();
+
+    const miaMsg = {
+      from:       'mia',
+      message:    data.response?.content || data.response || '🌴',
+      sources:    data.sources    || [],
+      quickLinks: data.quickLinks || [],
+      language:   data.language   || 'en',
+    };
+    state.chats.push(miaMsg);
+    localStorage.setItem(CHATS_KEY, JSON.stringify(state.chats));
+    renderMsg(miaMsg);
+    state.lang = miaMsg.language;
+
+    if (state.voiceOn && window.speechSynthesis) {
+      const clean = miaMsg.message.replace(/https?:\/\/\S+/g, '').replace(/[*_#\[\]]/g, '');
+      const utt = new SpeechSynthesisUtterance(clean);
+      utt.lang = VOICE_LANGS[miaMsg.language] || 'en-US'; utt.pitch = 1.05; utt.rate = 0.97;
+      const voices = window.speechSynthesis.getVoices();
+      const v = voices.find(v => v.lang.startsWith(utt.lang.split('-')[0]) && /samantha|karen|moira|allison|zoe|monica/i.test(v.name));
+      if (v) utt.voice = v;
+      window.speechSynthesis.speak(utt);
+    }
+  } catch {
+    hideTyping();
+    renderMsg({ from: 'mia', message: 'Something went wrong — please try again.', sources: [], quickLinks: [] });
+  } finally {
+    state.loading = false; sendBtn.disabled = false; loadBar.classList.remove('on');
+  }
+}
+
+// ── Voice ──────────────────────────────────────────────────────────────────────
+function syncVoiceBtn() {
+  const btn = $('voice-btn');
+  btn.textContent = state.voiceOn ? '🔊' : '🔇';
+  btn.classList.toggle('muted', !state.voiceOn);
+}
+$('voice-btn').addEventListener('click', () => {
+  state.voiceOn = !state.voiceOn;
+  if (!state.voiceOn) window.speechSynthesis?.cancel();
+  syncVoiceBtn();
+});
+
+// ── Mic ────────────────────────────────────────────────────────────────────────
+function toggleMic() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { alert('Voice input not supported in this browser'); return; }
+  if (recognition) { recognition.stop(); return; }
+  recognition = new SR();
+  recognition.continuous = false; recognition.interimResults = false;
+  recognition.onresult = e => { inputEl.value = e.results[0][0].transcript; autoGrow(); };
+  recognition.onend = () => {
+    recognition = null;
+    $('mic-btn')?.classList.remove('active');
+    $('mic-input-btn')?.classList.remove('active');
+  };
+  recognition.start();
+  $('mic-btn')?.classList.add('active');
+  $('mic-input-btn')?.classList.add('active');
+}
+$('mic-btn').addEventListener('click', toggleMic);
+$('mic-input-btn').addEventListener('click', toggleMic);
+
+// ── Input ──────────────────────────────────────────────────────────────────────
+function autoGrow() {
+  inputEl.style.height = 'auto';
+  inputEl.style.height = Math.min(inputEl.scrollHeight, 110) + 'px';
+}
+inputEl.addEventListener('input', autoGrow);
+inputEl.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } });
+sendBtn.addEventListener('click', send);
+
+// ── Public API for starter buttons ─────────────────────────────────────────────
+window.mia = { prompt(text) { inputEl.value = text; autoGrow(); send(); } };
+
+boot();
+</script>
