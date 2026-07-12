@@ -1,436 +1,806 @@
 <style>
-/* ── Mia Holographic Design System ──────────────────────────────────────── */
+/* ─── Token system ─────────────────────────────────────────────────────────── */
 :root {
-  --holo-cyan:    #00f5ff;
-  --holo-magenta: #ff2d95;
-  --holo-purple:  #7b2fff;
-  --holo-dark:    #080818;
-  --holo-panel:   rgba(0,10,30,0.85);
+  --bg:          #0B0A12;
+  --surface:     #141320;
+  --surface-2:   #1C1B2A;
+  --surface-3:   #242233;
+  --border:      rgba(255,255,255,0.06);
+  --border-2:    rgba(255,255,255,0.10);
+  --border-acc:  rgba(240,100,74,0.22);
+  --ink:         #F0EDE8;
+  --ink-2:       #8A8492;
+  --ink-3:       #4E4B58;
+  --accent:      #F0644A;
+  --accent-dim:  rgba(240,100,74,0.13);
+  --teal:        #38B4C8;
+  --teal-dim:    rgba(56,180,200,0.09);
+  --ok:          #3DBE6E;
+  --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 20px;
+}
+@media (prefers-color-scheme: light) { :root {
+  --bg:#F5F3EF; --surface:#FFFFFF; --surface-2:#F0ECE7; --surface-3:#E8E3DD;
+  --border:rgba(0,0,0,0.07); --border-2:rgba(0,0,0,0.11); --border-acc:rgba(240,100,74,0.25);
+  --ink:#18161F; --ink-2:#6A6774; --ink-3:#AAA6B4;
+}}
+:root[data-theme="dark"]  {
+  --bg:#0B0A12; --surface:#141320; --surface-2:#1C1B2A; --surface-3:#242233;
+  --border:rgba(255,255,255,0.06); --border-2:rgba(255,255,255,0.10); --border-acc:rgba(240,100,74,0.22);
+  --ink:#F0EDE8; --ink-2:#8A8492; --ink-3:#4E4B58;
+}
+:root[data-theme="light"] {
+  --bg:#F5F3EF; --surface:#FFFFFF; --surface-2:#F0ECE7; --surface-3:#E8E3DD;
+  --border:rgba(0,0,0,0.07); --border-2:rgba(0,0,0,0.11); --border-acc:rgba(240,100,74,0.25);
+  --ink:#18161F; --ink-2:#6A6774; --ink-3:#AAA6B4;
 }
 
-/* Avatar hologram ring */
-.mia-holo-ring {
-  position: relative;
-  width: 100px;
-  height: 100px;
-  flex-shrink: 0;
+/* ─── Reset ────────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', system-ui, sans-serif;
+  font-size: 15px; line-height: 1.6;
+  background: var(--bg); color: var(--ink);
+  -webkit-font-smoothing: antialiased;
 }
-.mia-holo-ring img {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
-  filter: drop-shadow(0 0 8px var(--holo-cyan))
-          drop-shadow(0 0 16px rgba(0,245,255,0.4))
-          saturate(0.8) hue-rotate(170deg) brightness(1.15);
-  animation: holo-flicker 5s infinite;
-}
-/* scanlines overlay */
-.mia-holo-ring::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: repeating-linear-gradient(
-    0deg, transparent, transparent 3px,
-    rgba(0,245,255,0.06) 3px, rgba(0,245,255,0.06) 4px
-  );
-  pointer-events: none;
-  z-index: 2;
-}
-/* animated glow ring */
-.mia-holo-ring::after {
-  content: '';
-  position: absolute;
-  inset: -6px;
-  border-radius: 50%;
-  border: 2px solid rgba(0,245,255,0.7);
-  box-shadow: 0 0 12px rgba(0,245,255,0.6), 0 0 28px rgba(0,245,255,0.25),
-              inset 0 0 12px rgba(0,245,255,0.1);
-  animation: ring-pulse 2.4s infinite;
-}
-@keyframes ring-pulse {
-  0%,100% { box-shadow: 0 0 12px rgba(0,245,255,0.6), 0 0 28px rgba(0,245,255,0.25); transform: scale(1); }
-  50%      { box-shadow: 0 0 22px rgba(0,245,255,0.9), 0 0 48px rgba(0,245,255,0.45); transform: scale(1.03); }
-}
-@keyframes holo-flicker {
-  0%,87%,100% { opacity: 1; }
-  89% { opacity: 0.82; } 90% { opacity: 1; }
-  93% { opacity: 0.88; } 94% { opacity: 1; }
+a { color: inherit; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+textarea { font-family: inherit; }
+
+/* ─── App shell ─────────────────────────────────────────────────────────────── */
+.app { display: grid; grid-template-columns: 228px 1fr; height: 100vh; overflow: hidden; }
+
+/* ─── Sidebar ───────────────────────────────────────────────────────────────── */
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; overflow: hidden;
 }
 
-/* Orbiting particles */
-.mia-orbit {
-  position: absolute;
-  inset: -20px;
-  border-radius: 50%;
-  border: 1px dashed rgba(0,245,255,0.2);
-  animation: orbit-spin 8s linear infinite;
-}
-.mia-orbit::before {
-  content: '◆';
-  position: absolute;
-  top: -5px; left: 50%;
-  transform: translateX(-50%);
-  color: var(--holo-cyan);
-  font-size: 8px;
-  filter: drop-shadow(0 0 4px var(--holo-cyan));
-}
-@keyframes orbit-spin { to { transform: rotate(360deg); } }
-.mia-orbit-2 {
-  inset: -30px;
-  border-color: rgba(255,45,149,0.15);
-  animation: orbit-spin 12s linear infinite reverse;
-}
-.mia-orbit-2::before { content: '●'; color: var(--holo-magenta); font-size: 6px; }
+.sidebar-brand { padding: 20px 18px 18px; border-bottom: 1px solid var(--border); }
 
-/* Language badge */
-.lang-flag {
-  font-size: 1.4rem;
-  opacity: 0.35;
-  transition: all 0.3s;
-  cursor: default;
-}
-.lang-flag.active { opacity: 1; filter: drop-shadow(0 0 6px rgba(0,245,255,0.8)); transform: scale(1.25); }
+.mia-ident { display: flex; align-items: center; gap: 11px; }
 
-/* Status dot */
-.status-dot {
-  display: inline-block;
-  width: 8px; height: 8px;
-  background: #00ff88;
-  border-radius: 50%;
-  box-shadow: 0 0 6px #00ff88;
-  animation: blink-dot 2s infinite;
+/* Sunrise halo — the one animated element */
+.avatar-wrap { position: relative; width: 40px; height: 40px; flex-shrink: 0; }
+.halo {
+  position: absolute; inset: -3px; border-radius: 50%;
+  background: conic-gradient(from 0deg, #F0644A, #F5A462, #E8C96D, #F5A462, #F0644A);
+  animation: halo-turn 10s linear infinite;
 }
-@keyframes blink-dot { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+@keyframes halo-turn { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .halo { animation: none; } }
+.avatar-inner { position: absolute; inset: 2.5px; border-radius: 50%; overflow: hidden; background: var(--bg); }
+.avatar-inner img { width: 100%; height: 100%; object-fit: cover; filter: saturate(0.88); display: block; }
 
-/* Chat panel */
-.mia-chat-panel {
-  background: var(--holo-panel);
-  border: 1px solid rgba(0,245,255,0.15);
-  border-radius: 1rem;
-  backdrop-filter: blur(16px);
-}
-.mia-chat-panel::-webkit-scrollbar { width: 4px; }
-.mia-chat-panel::-webkit-scrollbar-track { background: transparent; }
-.mia-chat-panel::-webkit-scrollbar-thumb { background: rgba(0,245,255,0.3); border-radius: 2px; }
+.mia-nameblock .name { font-size: 14px; font-weight: 700; letter-spacing: 0.03em; color: var(--ink); line-height: 1.2; }
+.mia-nameblock .role { font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-3); margin-top: 2px; }
 
-/* Bubble */
-.bubble-mia {
-  background: linear-gradient(135deg, rgba(0,245,255,0.1), rgba(0,30,60,0.9));
-  border: 1px solid rgba(0,245,255,0.25);
-  border-radius: 0 1rem 1rem 1rem;
-  box-shadow: 0 0 20px rgba(0,245,255,0.06);
+.online-row { display: flex; align-items: center; gap: 7px; margin-top: 13px; }
+.online-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 5px var(--ok); }
+.online-label { font-size: 10px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-3); }
+
+/* Language tabs */
+.lang-row { display: flex; gap: 4px; padding: 12px 18px; border-bottom: 1px solid var(--border); }
+.lang-btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 7px 4px; border-radius: var(--r-sm);
+  border: 1px solid transparent; background: transparent; color: var(--ink-3);
+  transition: all 0.18s;
 }
-.bubble-me {
-  background: linear-gradient(135deg, rgba(123,47,255,0.25), rgba(60,0,100,0.8));
-  border: 1px solid rgba(123,47,255,0.3);
-  border-radius: 1rem 0 1rem 1rem;
+.lang-btn .flag { font-size: 15px; line-height: 1; }
+.lang-btn .code { font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; font-variant-numeric: tabular-nums; }
+.lang-btn.active { background: var(--accent-dim); border-color: var(--border-acc); color: var(--accent); }
+
+/* Sidebar sections */
+.s-section { padding: 14px 18px; border-bottom: 1px solid var(--border); }
+.s-label {
+  font-size: 9.5px; letter-spacing: 0.11em; text-transform: uppercase;
+  color: var(--ink-3); font-weight: 600; margin-bottom: 8px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.s-label-action {
+  font-size: 9.5px; letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--ink-3); cursor: pointer; transition: color 0.15s;
+  font-family: 'SF Mono', Consolas, monospace;
+}
+.s-label-action:hover { color: var(--teal); }
+
+/* Knowledge graph */
+.graph-frame { background: var(--bg); border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; }
+#mia-graph-canvas { width: 100%; height: 118px; display: block; }
+.graph-meta {
+  display: flex; justify-content: space-between;
+  padding: 5px 10px; border-top: 1px solid var(--border);
+  font-size: 9.5px; color: var(--ink-3);
+  font-family: 'SF Mono', 'Cascadia Code', Consolas, monospace;
+  font-variant-numeric: tabular-nums; letter-spacing: 0.04em;
 }
 
-/* Source chip */
-.source-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: rgba(0,245,255,0.08);
-  border: 1px solid rgba(0,245,255,0.2);
-  border-radius: 999px;
-  padding: 2px 10px;
-  font-size: 0.72rem;
-  color: var(--holo-cyan);
-  text-decoration: none;
-  transition: all 0.2s;
+/* Ecosystem links */
+.eco-link {
+  display: flex; align-items: center; gap: 9px;
+  padding: 6px 2px; font-size: 12px; color: var(--ink-2);
+  text-decoration: none; transition: color 0.15s;
 }
-.source-chip:hover {
-  background: rgba(0,245,255,0.18);
-  box-shadow: 0 0 8px rgba(0,245,255,0.3);
+.eco-link:hover { color: var(--ink); }
+.eco-icon {
+  width: 18px; height: 18px; background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 5px; display: flex; align-items: center; justify-content: center;
+  font-size: 10px; flex-shrink: 0;
 }
 
-/* Quick link button */
-.quick-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: rgba(255,45,149,0.1);
-  border: 1px solid rgba(255,45,149,0.3);
-  border-radius: 6px;
-  padding: 3px 10px;
-  font-size: 0.72rem;
-  color: #ff6eb7;
-  text-decoration: none;
-  transition: all 0.2s;
+/* Sidebar footer */
+.sidebar-footer {
+  margin-top: auto; padding: 12px 18px; border-top: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
 }
-.quick-link:hover { background: rgba(255,45,149,0.22); box-shadow: 0 0 8px rgba(255,45,149,0.3); }
+.footer-btn { font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); transition: color 0.15s; }
+.footer-btn:hover { color: var(--ink-2); }
+.footer-btn.danger:hover { color: #e05050; }
 
-/* Input area */
-.mia-input {
-  background: rgba(0,10,30,0.9);
-  border: 1px solid rgba(0,245,255,0.2);
-  border-radius: 0.75rem;
-  color: #e0f8ff;
-  resize: none;
-  transition: border-color 0.2s;
-}
-.mia-input:focus { outline: none; border-color: rgba(0,245,255,0.6); box-shadow: 0 0 12px rgba(0,245,255,0.15); }
-.mia-input::placeholder { color: rgba(0,245,255,0.3); }
+/* ─── Main ──────────────────────────────────────────────────────────────────── */
+.main { display: flex; flex-direction: column; overflow: hidden; position: relative; background: var(--bg); }
 
-/* Send button */
-.btn-mia-send {
-  background: linear-gradient(135deg, #00c4cc, #0066ff);
-  border: none;
-  border-radius: 0.75rem;
-  color: #fff;
-  font-weight: 700;
-  padding: 0 1.2rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 0 12px rgba(0,200,255,0.3);
+.chat-topbar {
+  flex-shrink: 0; height: 52px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 24px; gap: 8px;
 }
-.btn-mia-send:hover:not(:disabled) { box-shadow: 0 0 22px rgba(0,200,255,0.6); transform: translateY(-1px); }
-.btn-mia-send:disabled { opacity: 0.5; cursor: not-allowed; }
+.topbar-title { font-size: 13px; font-weight: 600; color: var(--ink-2); letter-spacing: 0.02em; }
+.topbar-sep { color: var(--ink-3); }
+.topbar-intent {
+  font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--ink-3); font-family: 'SF Mono', Consolas, monospace;
+}
+.topbar-actions { margin-left: auto; display: flex; gap: 6px; }
+.topbar-btn {
+  width: 28px; height: 28px; border-radius: var(--r-sm);
+  border: 1px solid var(--border); background: transparent; color: var(--ink-3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; cursor: pointer; transition: all 0.15s;
+}
+.topbar-btn:hover { background: var(--surface-2); color: var(--ink-2); }
+.topbar-btn.muted { color: var(--accent); background: var(--accent-dim); border-color: var(--border-acc); }
 
-.btn-mia-icon {
-  background: rgba(0,245,255,0.08);
-  border: 1px solid rgba(0,245,255,0.2);
-  border-radius: 0.75rem;
-  color: var(--holo-cyan);
-  padding: 0 0.75rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-size: 1.1rem;
-}
-.btn-mia-icon:hover { background: rgba(0,245,255,0.18); }
-.btn-mia-icon.active { border-color: rgba(255,45,149,0.6); color: var(--holo-magenta); background: rgba(255,45,149,0.1); }
-
-/* Graph panel */
-.graph-panel {
-  background: rgba(0,5,20,0.9);
-  border: 1px solid rgba(0,245,255,0.12);
-  border-radius: 1rem;
-  overflow: hidden;
-}
-#mia-graph-canvas {
-  width: 100%; height: 220px;
-  display: block;
-}
-
-/* Loading beam */
-.loading-beam {
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--holo-cyan), var(--holo-magenta), transparent);
+/* Loading bar */
+.load-bar {
+  position: absolute; top: 52px; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--accent) 40%, var(--teal) 60%, transparent 100%);
   background-size: 200% 100%;
-  animation: beam-scan 1.2s linear infinite;
-  border-radius: 2px;
+  animation: lscan 1.1s ease-in-out infinite;
+  opacity: 0; transition: opacity 0.2s; pointer-events: none; z-index: 10;
 }
-@keyframes beam-scan {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+.load-bar.on { opacity: 1; }
+@keyframes lscan { 0% { background-position: 200% 0; } 100% { background-position: -100% 0; } }
+
+/* Messages */
+.messages { flex: 1; overflow-y: auto; padding: 24px 0 8px; }
+.messages::-webkit-scrollbar { width: 3px; }
+.messages::-webkit-scrollbar-track { background: transparent; }
+.messages::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 2px; }
+
+.msg-row { padding: 3px 24px; }
+.msg-row.gap { margin-top: 14px; }
+.msg-inner { display: flex; gap: 10px; }
+.msg-inner.me { flex-direction: row-reverse; }
+
+.msg-avatar { width: 26px; height: 26px; border-radius: 50%; overflow: hidden; flex-shrink: 0; margin-top: 2px; background: var(--surface-2); }
+.msg-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.msg-avatar-me {
+  width: 26px; height: 26px; border-radius: 50%; background: var(--surface-3);
+  border: 1px solid var(--border-2); display: flex; align-items: center; justify-content: center;
+  font-size: 11px; flex-shrink: 0; margin-top: 2px; color: var(--ink-3);
 }
 
-/* Typing dots */
-.typing-dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--holo-cyan);
-  animation: tdot 1.2s infinite;
-}
-.typing-dot:nth-child(2) { animation-delay: 0.2s; }
-.typing-dot:nth-child(3) { animation-delay: 0.4s; }
-@keyframes tdot { 0%,60%,100% { transform: translateY(0); opacity:0.4; } 30% { transform: translateY(-6px); opacity:1; } }
+.msg-body { flex: 1; max-width: 520px; }
+.msg-inner.me .msg-body { display: flex; flex-direction: column; align-items: flex-end; }
 
-/* Mia section header */
-.holo-section-label {
-  font-size: 0.65rem;
-  font-family: monospace;
-  letter-spacing: 0.15em;
-  color: rgba(0,245,255,0.5);
-  text-transform: uppercase;
+.bubble {
+  display: inline-block; padding: 10px 14px; border-radius: var(--r-lg);
+  font-size: 14px; line-height: 1.65; max-width: 100%; word-break: break-word;
 }
+.bubble-mia { background: var(--surface); border: 1px solid var(--border); border-top-left-radius: 4px; color: var(--ink); }
+.bubble-me  { background: var(--surface-3); border: 1px solid var(--border-2); border-top-right-radius: 4px; color: var(--ink); }
 
-/* Graph toggle button */
-.graph-toggle {
-  font-size: 0.72rem;
-  font-family: monospace;
-  color: rgba(0,245,255,0.6);
-  background: none;
-  border: 1px solid rgba(0,245,255,0.2);
-  border-radius: 999px;
-  padding: 2px 12px;
-  cursor: pointer;
-  transition: all 0.2s;
+/* Sources */
+.msg-sources { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+.src-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10.5px; color: var(--teal); text-decoration: none;
+  background: var(--teal-dim); border: 1px solid rgba(56,180,200,0.12);
+  border-radius: 999px; padding: 2px 9px;
+  transition: all 0.15s;
+  font-family: 'SF Mono', 'Cascadia Code', Consolas, monospace; letter-spacing: 0.02em;
 }
-.graph-toggle:hover { background: rgba(0,245,255,0.1); color: var(--holo-cyan); }
+.src-chip:hover { background: rgba(56,180,200,0.16); border-color: rgba(56,180,200,0.28); }
+.src-chip .dot { font-size: 7px; opacity: 0.55; }
+
+/* Quick links */
+.msg-qlinks { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+.ql-btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; font-weight: 500; color: var(--accent); text-decoration: none;
+  background: var(--accent-dim); border: 1px solid var(--border-acc);
+  border-radius: var(--r-sm); padding: 3px 10px; transition: all 0.15s; letter-spacing: 0.01em;
+}
+.ql-btn:hover { background: rgba(240,100,74,0.2); }
+.ql-arrow { width: 10px; height: 10px; flex-shrink: 0; opacity: 0.65; }
+
+/* Typing */
+.typing-row { padding: 3px 24px; margin-top: 10px; }
+.typing-inner { display: flex; gap: 10px; }
+.typing-bubble {
+  display: inline-flex; align-items: center; gap: 4px; padding: 10px 14px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-lg); border-top-left-radius: 4px;
+}
+.td { width: 5px; height: 5px; border-radius: 50%; background: var(--ink-3); animation: td 1.2s ease infinite; }
+.td:nth-child(2) { animation-delay: 0.12s; }
+.td:nth-child(3) { animation-delay: 0.24s; }
+@keyframes td { 0%,60%,100% { transform: translateY(0); opacity: 0.25; } 30% { transform: translateY(-4px); opacity: 1; } }
+
+/* ─── Empty state ────────────────────────────────────────────────────────────── */
+.empty {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 18px; padding: 20px 40px; text-align: center;
+}
+.empty-avatar { position: relative; width: 60px; height: 60px; }
+.empty-halo {
+  position: absolute; inset: -3px; border-radius: 50%;
+  background: conic-gradient(from 0deg, #F0644A, #F5A462, #E8C96D, #F5A462, #F0644A);
+  animation: halo-turn 10s linear infinite; opacity: 0.7;
+}
+.empty-img { position: absolute; inset: 3px; border-radius: 50%; overflow: hidden; }
+.empty-img img { width: 100%; height: 100%; object-fit: cover; filter: saturate(0.88); display: block; }
+.empty-h { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; color: var(--ink); text-wrap: balance; }
+.empty-p { font-size: 13px; color: var(--ink-2); max-width: 340px; line-height: 1.65; text-wrap: balance; }
+
+.starters { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%; max-width: 460px; }
+.starter {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-md); padding: 10px 13px;
+  text-align: left; cursor: pointer; transition: background 0.15s, border-color 0.15s;
+}
+.starter:hover { background: var(--surface-2); border-color: var(--border-2); }
+.starter-label { font-size: 12px; color: var(--ink); font-weight: 500; line-height: 1.4; display: block; }
+.starter-sub { font-size: 10px; color: var(--ink-3); display: block; margin-top: 1px; }
+
+/* ─── Input ──────────────────────────────────────────────────────────────────── */
+.input-area { flex-shrink: 0; padding: 0 20px 20px; }
+.input-shell {
+  background: var(--surface); border: 1px solid var(--border-2);
+  border-radius: var(--r-xl); overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.input-shell:focus-within {
+  border-color: var(--border-acc);
+  box-shadow: 0 0 0 3px rgba(240,100,74,0.07);
+}
+.input-field {
+  width: 100%; background: transparent; border: none; outline: none;
+  padding: 14px 18px 6px; color: var(--ink); font-size: 14px; font-family: inherit;
+  line-height: 1.6; resize: none; min-height: 48px; max-height: 130px; display: block;
+}
+.input-field::placeholder { color: var(--ink-3); }
+.input-toolbar { display: flex; align-items: center; padding: 6px 10px 10px; gap: 4px; }
+.toolbar-hint {
+  font-size: 10px; color: var(--ink-3); margin-right: auto; padding-left: 6px;
+  font-family: 'SF Mono', Consolas, monospace; letter-spacing: 0.03em;
+}
+.ibutton {
+  width: 30px; height: 30px; border-radius: var(--r-sm);
+  border: 1px solid var(--border); background: transparent; color: var(--ink-3);
+  display: flex; align-items: center; justify-content: center; font-size: 14px;
+  cursor: pointer; transition: all 0.15s;
+}
+.ibutton:hover { background: var(--surface-2); color: var(--ink-2); border-color: var(--border-2); }
+.ibutton.active { background: var(--accent-dim); color: var(--accent); border-color: var(--border-acc); }
+.btn-send {
+  height: 30px; padding: 0 14px; border-radius: var(--r-sm);
+  background: var(--accent); border: none; color: #fff;
+  font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  cursor: pointer; transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+  display: flex; align-items: center; gap: 5px;
+}
+.btn-send:hover { background: #e05840; box-shadow: 0 2px 12px rgba(240,100,74,0.35); transform: translateY(-1px); }
+.btn-send:active { transform: translateY(0); }
+.btn-send:disabled { opacity: 0.38; cursor: not-allowed; box-shadow: none; transform: none; }
+
+/* ─── Responsive ─────────────────────────────────────────────────────────────── */
+@media (max-width: 700px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .msg-row { padding: 3px 14px; }
+  .typing-row { padding: 3px 14px; }
+  .input-area { padding: 0 12px 16px; }
+  .empty { padding: 20px; }
+  .starters { grid-template-columns: 1fr; }
+  .chat-topbar { padding: 0 16px; }
+}
 </style>
 
-<div x-data="miaChat" x-init="init()" class="max-w-3xl mx-auto px-3 py-4 flex flex-col gap-4" style="min-height:100vh; color:#d0f0ff;">
+<div class="app">
 
-  <!-- ── Mia Header ────────────────────────────────────────────────────────── -->
-  <div class="flex items-center gap-5 px-4 py-3 rounded-2xl" style="background:rgba(0,10,30,0.75); border:1px solid rgba(0,245,255,0.12);">
-    <!-- Holographic avatar -->
-    <div class="mia-holo-ring" style="position:relative;">
-      <div class="mia-orbit"></div>
-      <div class="mia-orbit mia-orbit-2"></div>
-      <img src="/assets/mia.jpg" alt="Mia" />
-    </div>
-
-    <!-- Name & status -->
-    <div class="flex-1">
-      <div class="flex items-center gap-2">
-        <h1 class="text-2xl font-black tracking-wider" style="color:var(--holo-cyan); text-shadow:0 0 12px rgba(0,245,255,0.6);">MIA</h1>
-        <span class="text-xs font-mono" style="color:rgba(0,245,255,0.4);">v2.0 · MiamiVerse</span>
-      </div>
-      <p class="text-xs font-mono" style="color:rgba(200,240,255,0.55);">Miami-Dade Community AI Guide</p>
-      <p class="text-xs font-mono mt-1" style="color:rgba(200,240,255,0.4);">Trilingual · Data-Connected · Holographic</p>
-    </div>
-
-    <!-- Language flags + status -->
-    <div class="flex flex-col items-end gap-2">
-      <div class="flex items-center gap-1">
-        <span class="status-dot"></span>
-        <span class="text-xs font-mono" style="color:#00ff88;">Online</span>
-      </div>
-      <div class="flex gap-2">
-        <span class="lang-flag" :class="{ active: lang === 'en' }" title="English">🇺🇸</span>
-        <span class="lang-flag" :class="{ active: lang === 'es' }" title="Español">🇪🇸</span>
-        <span class="lang-flag" :class="{ active: lang === 'ht' }" title="Kreyòl">🇭🇹</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── Chat Messages ─────────────────────────────────────────────────────── -->
-  <div id="chat-scroll" class="mia-chat-panel flex flex-col gap-3 p-4 overflow-y-auto" style="height:420px; max-height:55vh;">
-
-    <!-- Welcome message -->
-    <template x-if="chats.length === 0">
-      <div class="flex flex-col items-center justify-center h-full gap-3 text-center">
-        <div style="font-size:3rem; filter:drop-shadow(0 0 12px rgba(0,245,255,0.7));">🌴</div>
-        <p class="font-bold" style="color:var(--holo-cyan);">Hey! I'm Mia 👋</p>
-        <p class="text-sm" style="color:rgba(200,240,255,0.6);">Ask me anything about Miami-Dade — in English, Español, or Kreyòl!</p>
-        <div class="flex flex-wrap justify-center gap-2 mt-2">
-          <button @click="currentMessage='What are the best parks in Miami-Dade?'; sendMessage()" class="source-chip cursor-pointer">🌳 Parks near me</button>
-          <button @click="currentMessage='How do I ride the Metrorail?'; sendMessage()" class="source-chip cursor-pointer">🚇 Transit guide</button>
-          <button @click="currentMessage='¿Dónde puedo solicitar un permiso de construcción?'; sendMessage()" class="source-chip cursor-pointer">🏗️ Permisos</button>
-          <button @click="currentMessage='Kote mwen ka jwenn sèvis sante nan Miami-Dade?'; sendMessage()" class="source-chip cursor-pointer">🏥 Sèvis sante</button>
-          <button @click="currentMessage='What open datasets does Miami-Dade have?'; sendMessage()" class="source-chip cursor-pointer">📊 Open Data</button>
-          <button @click="currentMessage='Tell me about climate resilience in Miami'; sendMessage()" class="source-chip cursor-pointer">🌊 Climate</button>
-        </div>
-      </div>
-    </template>
-
-    <!-- Chat history -->
-    <template x-for="(chat, idx) in chats" :key="idx">
-      <div :class="chat.from === 'me' ? 'flex justify-end' : 'flex justify-start'">
-        <div class="max-w-xs sm:max-w-md" :class="chat.from === 'me' ? 'items-end' : 'items-start'" style="display:flex;flex-direction:column;gap:6px;">
-
-          <!-- Bubble -->
-          <div class="px-4 py-3 text-sm" :class="chat.from === 'me' ? 'bubble-me' : 'bubble-mia'" style="white-space:pre-wrap;word-break:break-word;">
-            <span x-text="chat.message"></span>
+  <!-- ── Sidebar ──────────────────────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="mia-ident">
+        <div class="avatar-wrap">
+          <div class="halo"></div>
+          <div class="avatar-inner">
+            <img src="/assets/mia.jpg" alt="Mia"
+              onerror="this.style.display='none'; this.parentNode.style.background='#F0644A'">
           </div>
-
-          <!-- Sources (Mia only) -->
-          <template x-if="chat.from === 'mia' && chat.sources && chat.sources.length > 0">
-            <div class="flex flex-wrap gap-1 px-1">
-              <span class="holo-section-label w-full">Sources</span>
-              <template x-for="src in chat.sources" :key="src.url">
-                <a :href="src.url" target="_blank" rel="noopener" class="source-chip" :title="src.description">
-                  🔗 <span x-text="src.title"></span>
-                </a>
-              </template>
-            </div>
-          </template>
-
-          <!-- Quick links (Mia only) -->
-          <template x-if="chat.from === 'mia' && chat.quickLinks && chat.quickLinks.length > 0">
-            <div class="flex flex-wrap gap-1 px-1">
-              <template x-for="ql in chat.quickLinks" :key="ql.url">
-                <a :href="ql.url" target="_blank" rel="noopener" class="quick-link">
-                  ↗ <span x-text="ql.label"></span>
-                </a>
-              </template>
-            </div>
-          </template>
-
+        </div>
+        <div class="mia-nameblock">
+          <div class="name">Mia</div>
+          <div class="role">Miami-Dade Guide</div>
         </div>
       </div>
-    </template>
+      <div class="online-row">
+        <div class="online-dot"></div>
+        <span class="online-label">Available · Trilingual</span>
+      </div>
+    </div>
 
-    <!-- Typing indicator -->
-    <template x-if="loading">
-      <div class="flex justify-start">
-        <div class="bubble-mia px-4 py-3 flex gap-2 items-center">
-          <div class="typing-dot"></div>
-          <div class="typing-dot"></div>
-          <div class="typing-dot"></div>
+    <div class="lang-row">
+      <button class="lang-btn active" id="lang-en">
+        <span class="flag">🇺🇸</span><span class="code">EN</span>
+      </button>
+      <button class="lang-btn" id="lang-es">
+        <span class="flag">🇪🇸</span><span class="code">ES</span>
+      </button>
+      <button class="lang-btn" id="lang-ht">
+        <span class="flag">🇭🇹</span><span class="code">HT</span>
+      </button>
+    </div>
+
+    <div class="s-section">
+      <div class="s-label">
+        <span>Knowledge Graph</span>
+        <button class="s-label-action" id="graph-expand">Expand ↗</button>
+      </div>
+      <div class="graph-frame">
+        <canvas id="mia-graph-canvas"></canvas>
+        <div class="graph-meta">
+          <span id="graph-nodes">0 nodes</span>
+          <span id="graph-edges">0 edges</span>
         </div>
       </div>
-    </template>
+    </div>
 
-  </div>
+    <div class="s-section">
+      <div class="s-label">Ecosystem</div>
+      <a href="https://opendata.miamidade.gov" target="_blank" rel="noopener" class="eco-link">
+        <div class="eco-icon">📊</div>Miami-Dade Open Data
+      </a>
+      <a href="https://github.com/openmiami" target="_blank" rel="noopener" class="eco-link">
+        <div class="eco-icon">⚡</div>OpenMiami
+      </a>
+      <a href="https://github.com/sustainacities" target="_blank" rel="noopener" class="eco-link">
+        <div class="eco-icon">🌿</div>SustainaCities
+      </a>
+      <a href="https://github.com/sustainacities/miagpt" target="_blank" rel="noopener" class="eco-link">
+        <div class="eco-icon">🤖</div>MiaGPT · Open Source
+      </a>
+      <a href="https://311.miamidade.gov" target="_blank" rel="noopener" class="eco-link">
+        <div class="eco-icon">📞</div>Miami-Dade 311
+      </a>
+      <a href="https://www.miamidade.gov/transit/" target="_blank" rel="noopener" class="eco-link">
+        <div class="eco-icon">🚇</div>MDT Transit
+      </a>
+    </div>
 
-  <!-- Loading beam -->
-  <div x-show="loading" class="loading-beam -mt-2"></div>
+    <div class="sidebar-footer">
+      <button class="footer-btn" id="voice-toggle">🔊 Voice on</button>
+      <button class="footer-btn danger" id="clear-btn">Clear</button>
+    </div>
+  </aside>
 
-  <!-- ── Input Area ────────────────────────────────────────────────────────── -->
-  <div class="flex gap-2 items-end">
-    <textarea
-      x-model="currentMessage"
-      @keydown.enter.exact.prevent="sendMessage()"
-      @keydown.enter.shift.exact="currentMessage += '\n'"
-      class="mia-input flex-1 text-sm px-4 py-3"
-      rows="2"
-      placeholder="Ask Mia about Miami... / Pregunta sobre Miami... / Poze Mia kesyon..."
-      :disabled="loading"
-    ></textarea>
-
-    <button @click="toggleListen()" class="btn-mia-icon h-full py-3" :class="{ active: listening }" title="Voice input">
-      <span x-text="listening ? '🔴' : '🎤'"></span>
-    </button>
-
-    <button @click="toggleVoice()" class="btn-mia-icon h-full py-3" :title="voiceOn ? 'Mute Mia' : 'Unmute Mia'">
-      <span x-text="voiceOn ? '🔊' : '🔇'"></span>
-    </button>
-
-    <button @click="sendMessage()" :disabled="loading || !currentMessage.trim()" class="btn-mia-send h-full">
-      <span x-show="!loading">Send ↗</span>
-      <span x-show="loading">…</span>
-    </button>
-  </div>
-
-  <!-- ── Knowledge Graph Panel ─────────────────────────────────────────────── -->
-  <div>
-    <div class="flex items-center justify-between mb-2">
-      <span class="holo-section-label">Knowledge Graph · MiamiVerse</span>
-      <div class="flex gap-2">
-        <button @click="showGraph = !showGraph" class="graph-toggle" x-text="showGraph ? '▲ Hide graph' : '▼ Show graph'"></button>
-        <button @click="clearHistory()" class="graph-toggle" style="color:rgba(255,100,100,0.6); border-color:rgba(255,100,100,0.2);">✕ Clear</button>
+  <!-- ── Main ─────────────────────────────────────────────────────────────── -->
+  <main class="main">
+    <div class="chat-topbar">
+      <span class="topbar-title">Mia</span>
+      <span class="topbar-sep">·</span>
+      <span class="topbar-intent" id="intent-label">Miami-Dade AI Guide</span>
+      <div class="topbar-actions">
+        <button class="topbar-btn" id="topbar-voice" title="Toggle voice">🔊</button>
+        <button class="topbar-btn" id="topbar-mic" title="Voice input">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="13" height="13">
+            <rect x="5" y="1" width="6" height="9" rx="3"/>
+            <path d="M2 8a6 6 0 0 0 12 0M8 14v2"/>
+          </svg>
+        </button>
       </div>
     </div>
 
-    <div x-show="showGraph" x-transition class="graph-panel">
-      <canvas id="mia-graph-canvas"></canvas>
-      <div class="px-4 py-2 flex flex-wrap gap-3" style="border-top:1px solid rgba(0,245,255,0.08);">
-        <span class="holo-section-label flex items-center gap-1"><span style="color:#00f5ff;">●</span> Place</span>
-        <span class="holo-section-label flex items-center gap-1"><span style="color:#ff6b35;">●</span> Service</span>
-        <span class="holo-section-label flex items-center gap-1"><span style="color:#9b59b6;">●</span> Dept</span>
-        <span class="holo-section-label flex items-center gap-1"><span style="color:#2ecc71;">●</span> Topic</span>
-        <span class="holo-section-label flex items-center gap-1"><span style="color:#e74c3c;">●</span> Dataset</span>
-        <span class="holo-section-label ml-auto" x-text="'Nodes: ' + $store.mia.graphNodes.length + ' · Edges: ' + $store.mia.graphEdges.length"></span>
+    <div class="load-bar" id="load-bar"></div>
+
+    <!-- Messages -->
+    <div class="messages" id="messages">
+      <div class="empty" id="empty-state">
+        <div class="empty-avatar">
+          <div class="empty-halo"></div>
+          <div class="empty-img">
+            <img src="/assets/mia.jpg" alt="Mia"
+              onerror="this.style.display='none'; this.parentNode.style.background='#F0644A'">
+          </div>
+        </div>
+        <h1 class="empty-h">Hey, I'm Mia 👋</h1>
+        <p class="empty-p">Your guide to everything Miami-Dade. Ask in English, Español, or Kreyòl — I'll respond in kind.</p>
+        <div class="starters">
+          <button class="starter" onclick="mia.prompt('What are the best parks in Miami-Dade?')">
+            <span class="starter-label">🌳 Parks &amp; Beaches</span>
+            <span class="starter-sub">Find recreation near you</span>
+          </button>
+          <button class="starter" onclick="mia.prompt('How do I ride the Metrorail?')">
+            <span class="starter-label">🚇 Transit Guide</span>
+            <span class="starter-sub">Metrorail, Metrobus, Mover</span>
+          </button>
+          <button class="starter" onclick="mia.prompt('¿Dónde solicito un permiso de construcción?')">
+            <span class="starter-label">🏗️ Permisos</span>
+            <span class="starter-sub">Construcción y zonificación</span>
+          </button>
+          <button class="starter" onclick="mia.prompt('Kote mwen ka jwenn sèvis sante nan Miami-Dade?')">
+            <span class="starter-label">🏥 Sèvis Sante</span>
+            <span class="starter-sub">Klinik ak lopital</span>
+          </button>
+          <button class="starter" onclick="mia.prompt('What open datasets does Miami-Dade publish?')">
+            <span class="starter-label">📊 Open Data</span>
+            <span class="starter-sub">Explore Miami datasets</span>
+          </button>
+          <button class="starter" onclick="mia.prompt('Tell me about climate resilience in Miami')">
+            <span class="starter-label">🌊 Climate &amp; Resilience</span>
+            <span class="starter-sub">Sea level, flooding, planning</span>
+          </button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- ── Ecosystem Links ───────────────────────────────────────────────────── -->
-  <div class="px-1">
-    <div class="holo-section-label mb-2">Connected Ecosystem</div>
-    <div class="flex flex-wrap gap-2">
-      <a href="https://opendata.miamidade.gov" target="_blank" rel="noopener" class="source-chip">📊 Miami-Dade Open Data</a>
-      <a href="https://github.com/openmiami" target="_blank" rel="noopener" class="source-chip">⚡ OpenMiami</a>
-      <a href="https://github.com/sustainacities" target="_blank" rel="noopener" class="source-chip">🌿 SustainaCities</a>
-      <a href="https://github.com/sustainacities/miagpt" target="_blank" rel="noopener" class="source-chip">🤖 MiaGPT</a>
-      <a href="https://311.miamidade.gov" target="_blank" rel="noopener" class="source-chip">📞 311</a>
-      <a href="https://www.miamidade.gov/transit/" target="_blank" rel="noopener" class="source-chip">🚇 Transit</a>
+    <!-- Input -->
+    <div class="input-area">
+      <div class="input-shell">
+        <textarea
+          class="input-field"
+          id="mia-input"
+          rows="1"
+          placeholder="Ask Mia about Miami-Dade…"
+        ></textarea>
+        <div class="input-toolbar">
+          <span class="toolbar-hint">↵ send · ⇧↵ newline</span>
+          <button class="ibutton" id="mic-btn" title="Voice input">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="13" height="13">
+              <rect x="5" y="1" width="6" height="9" rx="3"/>
+              <path d="M2 8a6 6 0 0 0 12 0M8 14v2"/>
+            </svg>
+          </button>
+          <button class="btn-send" id="send-btn">
+            Send
+            <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" width="10" height="10">
+              <path d="M2 10 L10 2 M4 2 H10 V8"/>
+            </svg>
+          </button>
+        </div>
+      </div>
     </div>
-  </div>
-
+  </main>
 </div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+const CHATS_KEY = 'mia_chats_v3';
+const GRAPH_KEY = 'mia_graph_v3';
+const VOICE_LANGS = { en:'en-US', es:'es-US', ht:'fr-HT' };
+let state = {
+  chats:     JSON.parse(localStorage.getItem(CHATS_KEY) || '[]'),
+  graphData: JSON.parse(localStorage.getItem(GRAPH_KEY) || '{"nodes":[],"edges":[]}'),
+  lang:      'en',
+  voiceOn:   true,
+  loading:   false,
+};
+let recognition = null;
+let graphInst   = null;
+
+// ── DOM ────────────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const msgsEl    = $('messages');
+const emptyEl   = $('empty-state');
+const inputEl   = $('mia-input');
+const sendBtn   = $('send-btn');
+const loadBar   = $('load-bar');
+const intentLbl = $('intent-label');
+const nodesLbl  = $('graph-nodes');
+const edgesLbl  = $('graph-edges');
+
+// ── Boot ───────────────────────────────────────────────────────────────────
+function boot() {
+  if (state.chats.length) {
+    emptyEl.style.display = 'none';
+    state.chats.forEach(c => renderMsg(c, false));
+  }
+  updateGraphStats();
+  initGraph();
+  syncVoiceButtons();
+}
+
+// ── Render message ─────────────────────────────────────────────────────────
+function renderMsg(chat, scroll = true) {
+  emptyEl.style.display = 'none';
+  const isMe = chat.from === 'me';
+  const row  = document.createElement('div');
+  row.className = 'msg-row gap';
+
+  const inner = document.createElement('div');
+  inner.className = 'msg-inner' + (isMe ? ' me' : '');
+
+  // Avatar
+  const av = document.createElement('div');
+  av.className = isMe ? 'msg-avatar-me' : 'msg-avatar';
+  if (!isMe) {
+    av.innerHTML = '<img src="/assets/mia.jpg" alt="Mia" onerror="this.style.display=\'none\';this.parentNode.style.background=\'#F0644A\'">';
+  } else {
+    av.textContent = '👤';
+  }
+  inner.appendChild(av);
+
+  // Body
+  const body = document.createElement('div');
+  body.className = 'msg-body';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble ' + (isMe ? 'bubble-me' : 'bubble-mia');
+  bubble.textContent = chat.message;
+  body.appendChild(bubble);
+
+  if (!isMe) {
+    if (chat.sources && chat.sources.length) {
+      const srcs = document.createElement('div');
+      srcs.className = 'msg-sources';
+      chat.sources.forEach(s => {
+        const a = document.createElement('a');
+        a.className = 'src-chip'; a.href = s.url; a.target = '_blank'; a.rel = 'noopener';
+        a.title = s.description || ''; a.innerHTML = `<span class="dot">●</span>${s.title}`;
+        srcs.appendChild(a);
+      });
+      body.appendChild(srcs);
+    }
+    if (chat.quickLinks && chat.quickLinks.length) {
+      const qls = document.createElement('div'); qls.className = 'msg-qlinks';
+      chat.quickLinks.forEach(q => {
+        const a = document.createElement('a');
+        a.className = 'ql-btn'; a.href = q.url; a.target = '_blank'; a.rel = 'noopener';
+        a.innerHTML = `<svg class="ql-arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 10 L10 2 M4 2 H10 V8"/></svg>${q.label}`;
+        qls.appendChild(a);
+      });
+      body.appendChild(qls);
+    }
+  }
+
+  inner.appendChild(body);
+  row.appendChild(inner);
+  msgsEl.appendChild(row);
+  if (scroll) row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ── Typing indicator ───────────────────────────────────────────────────────
+let typingEl = null;
+function showTyping() {
+  typingEl = document.createElement('div'); typingEl.className = 'typing-row';
+  typingEl.innerHTML = `<div class="typing-inner"><div class="msg-avatar"><img src="/assets/mia.jpg" alt="" onerror="this.style.display='none';this.parentNode.style.background='#F0644A'"></div><div class="typing-bubble"><div class="td"></div><div class="td"></div><div class="td"></div></div></div>`;
+  msgsEl.appendChild(typingEl); typingEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+function hideTyping() { typingEl?.remove(); typingEl = null; }
+
+// ── Send ───────────────────────────────────────────────────────────────────
+async function send() {
+  const text = inputEl.value.trim();
+  if (!text || state.loading) return;
+  inputEl.value = ''; autoGrow();
+  state.loading = true; sendBtn.disabled = true; loadBar.classList.add('on');
+
+  const meMsg = { from: 'me', message: text };
+  state.chats.push(meMsg); renderMsg(meMsg); showTyping();
+
+  try {
+    const res  = await fetch('/api/chat', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ input: { currentMessage: text } })
+    });
+    const data = await res.json();
+    hideTyping();
+
+    const miaMsg = {
+      from:       'mia',
+      message:    data.response?.content || data.response || '🌴',
+      sources:    data.sources    || [],
+      quickLinks: data.quickLinks || [],
+      language:   data.language   || 'en',
+    };
+    state.chats.push(miaMsg);
+    localStorage.setItem(CHATS_KEY, JSON.stringify(state.chats));
+    renderMsg(miaMsg);
+    setLang(miaMsg.language);
+    if (data.intent) intentLbl.textContent = data.intent.replace(/_/g, ' ');
+
+    if (data.entities?.length) {
+      data.entities.forEach(e => graphInst?.addNode(e.id, e.label, e.type));
+      data.relations?.forEach(r => graphInst?.addEdge(r.source, r.target, r.relation));
+      state.graphData.nodes.push(...(data.entities || []));
+      state.graphData.edges.push(...(data.relations || []));
+      localStorage.setItem(GRAPH_KEY, JSON.stringify(state.graphData));
+      updateGraphStats();
+    }
+
+    if (state.voiceOn && window.speechSynthesis) {
+      const clean = miaMsg.message.replace(/https?:\/\/\S+/g, '').replace(/[*_#\[\]]/g, '');
+      const utt = new SpeechSynthesisUtterance(clean);
+      utt.lang = VOICE_LANGS[miaMsg.language] || 'en-US'; utt.pitch = 1.05; utt.rate = 0.97;
+      const voices = window.speechSynthesis.getVoices();
+      const v = voices.find(v => v.lang.startsWith(utt.lang.split('-')[0]) && /samantha|karen|moira|allison|zoe|monica/i.test(v.name));
+      if (v) utt.voice = v;
+      window.speechSynthesis.speak(utt);
+    }
+  } catch {
+    hideTyping();
+    const err = { from: 'mia', message: 'Something went wrong — please try again.', sources: [], quickLinks: [] };
+    state.chats.push(err); renderMsg(err);
+  } finally {
+    state.loading = false; sendBtn.disabled = false; loadBar.classList.remove('on');
+  }
+}
+
+// ── Lang ───────────────────────────────────────────────────────────────────
+function setLang(l) {
+  state.lang = l;
+  ['en','es','ht'].forEach(c => $(`lang-${c}`)?.classList.toggle('active', c === l));
+}
+
+// ── Voice ──────────────────────────────────────────────────────────────────
+function syncVoiceButtons() {
+  const label = state.voiceOn ? '🔊 Voice on' : '🔇 Voice off';
+  $('voice-toggle').textContent = label;
+  const tb = $('topbar-voice');
+  if (tb) { tb.textContent = state.voiceOn ? '🔊' : '🔇'; tb.classList.toggle('muted', !state.voiceOn); }
+}
+function toggleVoice() {
+  state.voiceOn = !state.voiceOn;
+  if (!state.voiceOn) window.speechSynthesis?.cancel();
+  syncVoiceButtons();
+}
+$('voice-toggle').addEventListener('click', toggleVoice);
+$('topbar-voice')?.addEventListener('click', toggleVoice);
+
+// ── Mic ────────────────────────────────────────────────────────────────────
+function toggleMic() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { alert('Voice input not supported in this browser'); return; }
+  if (recognition) { recognition.stop(); return; }
+  recognition = new SR();
+  recognition.continuous = false; recognition.interimResults = false;
+  recognition.onresult = e => { inputEl.value = e.results[0][0].transcript; autoGrow(); };
+  recognition.onend = () => {
+    recognition = null;
+    $('mic-btn')?.classList.remove('active');
+    $('topbar-mic')?.classList.remove('active');
+  };
+  recognition.start();
+  $('mic-btn')?.classList.add('active');
+  $('topbar-mic')?.classList.add('active');
+}
+$('mic-btn')?.addEventListener('click', toggleMic);
+$('topbar-mic')?.addEventListener('click', toggleMic);
+
+// ── Clear ──────────────────────────────────────────────────────────────────
+$('clear-btn').addEventListener('click', () => {
+  if (!confirm('Clear all conversation history and knowledge graph?')) return;
+  state.chats = []; state.graphData = { nodes: [], edges: [] };
+  localStorage.removeItem(CHATS_KEY); localStorage.removeItem(GRAPH_KEY);
+  msgsEl.querySelectorAll('.msg-row, .typing-row').forEach(el => el.remove());
+  emptyEl.style.display = 'flex';
+  updateGraphStats();
+  if (graphInst) { graphInst.nodes = []; graphInst.edges = []; }
+  intentLbl.textContent = 'Miami-Dade AI Guide';
+  setLang('en');
+});
+
+// ── Input auto-grow ────────────────────────────────────────────────────────
+function autoGrow() {
+  inputEl.style.height = 'auto';
+  inputEl.style.height = Math.min(inputEl.scrollHeight, 130) + 'px';
+}
+inputEl.addEventListener('input', autoGrow);
+inputEl.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } });
+sendBtn.addEventListener('click', send);
+
+// ── Public API for starter buttons ─────────────────────────────────────────
+window.mia = { prompt(text) { inputEl.value = text; autoGrow(); inputEl.focus(); } };
+
+// ── Graph stats ────────────────────────────────────────────────────────────
+function updateGraphStats() {
+  const seen = new Set(); state.graphData.nodes.forEach(n => seen.add(n.id));
+  nodesLbl.textContent = seen.size + ' nodes';
+  edgesLbl.textContent = state.graphData.edges.length + ' edges';
+}
+
+// ── Knowledge Graph ────────────────────────────────────────────────────────
+class MiaGraph {
+  constructor(canvas) {
+    this.canvas = canvas; this.ctx = canvas.getContext('2d');
+    this.nodes = []; this.edges = [];
+    this._resize(); window.addEventListener('resize', () => this._resize());
+  }
+  _resize() {
+    const r = this.canvas.getBoundingClientRect();
+    this.canvas.width = r.width || 192; this.canvas.height = r.height || 118;
+  }
+  addNode(id, label, type) {
+    if (this.nodes.find(n => n.id === id)) return;
+    const C = { place:'#F0644A', service:'#38B4C8', department:'#9b59b6', topic:'#3DBE6E', dataset:'#F5A462', person:'#E8C96D' };
+    this.nodes.push({ id, label, type, color: C[type]||'#38B4C8',
+      x: this.canvas.width*(0.2+Math.random()*0.6), y: this.canvas.height*(0.2+Math.random()*0.6),
+      vx:0, vy:0, pulse: Math.random()*Math.PI*2 });
+    if (!this._running) this._start();
+  }
+  addEdge(s, t, r) {
+    if (!s||!t||this.edges.find(e=>e.s===s&&e.t===t)) return;
+    this.edges.push({s,t,r});
+  }
+  _tick() {
+    const N=this.nodes, W=this.canvas.width, H=this.canvas.height;
+    for(let i=0;i<N.length;i++) for(let j=i+1;j<N.length;j++){
+      const a=N[i],b=N[j],dx=b.x-a.x,dy=b.y-a.y,d=Math.sqrt(dx*dx+dy*dy)||1;
+      const f=Math.min(2000/(d*d),2.5);
+      a.vx-=f*dx/d; a.vy-=f*dy/d; b.vx+=f*dx/d; b.vy+=f*dy/d;
+    }
+    for(const e of this.edges){
+      const a=N.find(n=>n.id===e.s), b=N.find(n=>n.id===e.t);
+      if(!a||!b) continue;
+      const dx=b.x-a.x,dy=b.y-a.y,d=Math.sqrt(dx*dx+dy*dy)||1,f=(d-80)*0.007;
+      a.vx+=f*dx/d; a.vy+=f*dy/d; b.vx-=f*dx/d; b.vy-=f*dy/d;
+    }
+    for(const n of N){
+      n.vx+=(W/2-n.x)*0.002; n.vy+=(H/2-n.y)*0.002;
+      n.vx*=0.88; n.vy*=0.88; n.x+=n.vx; n.y+=n.vy;
+      n.x=Math.max(14,Math.min(W-14,n.x)); n.y=Math.max(10,Math.min(H-10,n.y));
+      n.pulse+=0.035;
+    }
+  }
+  _draw() {
+    const {ctx}=this;
+    ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
+    for(const e of this.edges){
+      const a=this.nodes.find(n=>n.id===e.s), b=this.nodes.find(n=>n.id===e.t);
+      if(!a||!b) continue;
+      ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
+      const g=ctx.createLinearGradient(a.x,a.y,b.x,b.y);
+      g.addColorStop(0,a.color+'50'); g.addColorStop(1,b.color+'50');
+      ctx.strokeStyle=g; ctx.lineWidth=1; ctx.stroke();
+    }
+    for(const n of this.nodes){
+      const r=9+Math.sin(n.pulse)*1.5;
+      const gw=ctx.createRadialGradient(n.x,n.y,0,n.x,n.y,r*2.5);
+      gw.addColorStop(0,n.color+'45'); gw.addColorStop(1,'transparent');
+      ctx.beginPath(); ctx.arc(n.x,n.y,r*2.5,0,Math.PI*2); ctx.fillStyle=gw; ctx.fill();
+      ctx.beginPath(); ctx.arc(n.x,n.y,r,0,Math.PI*2); ctx.fillStyle=n.color+'22'; ctx.fill();
+      ctx.strokeStyle=n.color+'99'; ctx.lineWidth=1; ctx.stroke();
+      ctx.fillStyle='rgba(240,237,232,0.65)'; ctx.font='7px system-ui';
+      ctx.textAlign='center'; ctx.textBaseline='top';
+      ctx.fillText(n.label.slice(0,13), n.x, n.y+r+2);
+    }
+  }
+  _start() {
+    this._running = true;
+    const t=()=>{ if(this.nodes.length){this._tick();this._draw();} requestAnimationFrame(t); };
+    t();
+  }
+}
+
+function initGraph() {
+  const c = $('mia-graph-canvas'); if (!c) return;
+  graphInst = new MiaGraph(c);
+  state.graphData.nodes.forEach(n => graphInst.addNode(n.id, n.label, n.type));
+  state.graphData.edges.forEach(e => graphInst.addEdge(e.s||e.source, e.t||e.target, e.r||e.relation));
+}
+
+boot();
+</script>
